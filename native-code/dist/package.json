@@ -1,0 +1,6 @@
+{
+  "name": "@clevetura/ble-win32-x64",
+  "version": "1.0.0",
+  "main": "index.js",
+  "types": "index.d.ts"
+}

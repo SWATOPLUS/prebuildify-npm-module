@@ -1,0 +1,15 @@
+{
+  "name": "demo-package",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "ts-node main.cts"
+  },
+  "dependencies": {
+    "@clevetura/ble-win32-x64": "file:../native-code/dist/"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.10",
+    "ts-node": "^10.9.2"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "@clevetura/ble-win32-x64",
+  "version": "1.0.0",
+  "scripts": {
+    "install": "echo node-gyp skipped, use bun pack.ts to build package"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.18",
+    "@types/node": "^24.0.10",
+    "bun-dts": "^0.1.70",
+    "node-addon-api": "^4.3.0",
+    "prebuildify": "^6.0.0"
+  }
+}
