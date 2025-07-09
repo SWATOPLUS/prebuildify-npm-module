@@ -2,7 +2,7 @@ import { BleDevice } from '@clevetura/ble-win32-x64';
 
 function tryConnect(name: string) {
   const ble = new BleDevice();
-  ble.init(name, 'c0e20001-e552-4eeb-9850-0148411a043d');
+  ble.init('c0e20001-e552-4eeb-9850-0148411a043d');
   if (ble.connect()) {
     console.log('Connected successfully to', name);
     

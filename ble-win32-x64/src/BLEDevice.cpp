@@ -10,64 +10,55 @@ using namespace Windows::Devices::Bluetooth::GenericAttributeProfile;
 using namespace Windows::Devices::Enumeration;
 using namespace Windows::Storage::Streams;
 
-BLEDevice::BLEDevice(const std::wstring& nameSubstring,
-    const std::wstring& characteristicUuidStr)
-    : m_nameSubstring(nameSubstring),
-      m_charUuid(winrt::guid(characteristicUuidStr)) {
+BLEDevice::BLEDevice(const std::wstring& characteristicUuidStr)
+    : m_charUuid(winrt::guid(characteristicUuidStr)) {
     winrt::init_apartment();
 }
 
-std::optional<uint64_t> BLEDevice::findDeviceAddressByNameSubstring() {
-    winrt::init_apartment();  
-
-    auto selector = BluetoothLEDevice::GetDeviceSelector();  
-    auto devices = DeviceInformation::FindAllAsync(selector).get();  
-
-    for (auto&& device : devices) {  
-        const auto& name = device.Name();  
-        std::wstring nameStd = name.c_str();
-        if (!nameStd.empty() && nameStd.find(m_nameSubstring) != std::wstring::npos) {
-            auto bleDevice = BluetoothLEDevice::FromIdAsync(device.Id()).get();  
-            if (bleDevice != nullptr)  
-                return bleDevice.BluetoothAddress();  
-        }  
-    }  
-    return std::nullopt;  
-}
-
 bool BLEDevice::connect() {
-    auto optAddress = findDeviceAddressByNameSubstring();
-    if (!optAddress.has_value())
-        return false;
+    winrt::init_apartment();
 
-    uint64_t bluetoothAddress = *optAddress;
+    auto selector = BluetoothLEDevice::GetDeviceSelector();
+    auto devices = DeviceInformation::FindAllAsync(selector).get();
 
-    m_device = BluetoothLEDevice::FromBluetoothAddressAsync(bluetoothAddress).get();
-    if (!m_device) return false;
+    for (auto&& device : devices) {
+        try {
+            auto bleDevice = BluetoothLEDevice::FromIdAsync(device.Id()).get();
+            if (!bleDevice) continue;
 
-    auto services = m_device.GattServices();
-    for (auto&& service : services) {
-        auto charResult = service.GetCharacteristicsForUuidAsync(m_charUuid).get();
-        if (charResult.Status() != GattCommunicationStatus::Success)
-            continue;
+            auto servicesResult = bleDevice.GetGattServicesAsync().get();
+            if (servicesResult.Status() != GattCommunicationStatus::Success)
+                continue;
 
-        auto characteristics = charResult.Characteristics();
-        if (characteristics.Size() == 0)
-            continue;
+            for (auto&& service : servicesResult.Services()) {
+                auto charResult = service.GetCharacteristicsForUuidAsync(m_charUuid).get();
+                if (charResult.Status() != GattCommunicationStatus::Success)
+                    continue;
 
-        m_characteristic = characteristics.GetAt(0);
-        auto status = m_characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(
-            GattClientCharacteristicConfigurationDescriptorValue::Notify).get();
+                auto characteristics = charResult.Characteristics();
+                if (characteristics.Size() == 0)
+                    continue;
 
-        if (status != GattCommunicationStatus::Success)
-            return false;
+                m_device = bleDevice; // Save the device
+                m_characteristic = characteristics.GetAt(0);
 
-        m_characteristic.ValueChanged({ this, &BLEDevice::notificationHandler });
-        return true;
+                auto status = m_characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(
+                    GattClientCharacteristicConfigurationDescriptorValue::Notify).get();
+
+                if (status != GattCommunicationStatus::Success)
+                    return false;
+
+                m_characteristic.ValueChanged({ this, &BLEDevice::notificationHandler });
+                return true;
+            }
+        }
+        catch (...) {
+            // Ignore and try next device
+        }
     }
-    return false; // characteristic not found
-}
 
+    return false; // Characteristic not found on any device
+}
 
 void BLEDevice::notificationHandler(GattCharacteristic const&,
     GattValueChangedEventArgs const& args) {

@@ -12,8 +12,7 @@
 
 class BLEDevice {
 public:
-    BLEDevice(const std::wstring& nameSubstring,
-              const std::wstring& characteristicUuidStr);
+    BLEDevice(const std::wstring& characteristicUuidStr);
 
     bool connect();
     bool write(const std::vector<uint8_t>& data);
@@ -23,9 +22,8 @@ private:
     void notificationHandler(winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattCharacteristic const&,
         winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattValueChangedEventArgs const&);
 
-    std::optional<uint64_t> findDeviceAddressByNameSubstring();
+    //std::optional<uint64_t> findDeviceAddressByVidPid();
 
-    std::wstring m_nameSubstring;
     winrt::guid m_charUuid;
 
     winrt::Windows::Devices::Bluetooth::BluetoothLEDevice m_device{ nullptr };

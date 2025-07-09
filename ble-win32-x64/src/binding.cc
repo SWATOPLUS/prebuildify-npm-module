@@ -4,13 +4,11 @@
 
 Napi::Value bleDeviceInit(const Napi::CallbackInfo &info)
 {
-  return processArgs<Napi::String, Napi::String>(info, [&info](Napi::String nameSubstringValue, Napi::String characteristicUuidStrValue) -> Napi::Value
+  return processArgs<Napi::String>(info, [&info](Napi::String characteristicUuidStrValue) -> Napi::Value
                                                  {
-    auto nameSubstring = nameSubstringValue.Utf8Value();
     auto characteristicUuidStr = characteristicUuidStrValue.Utf8Value();
-    std::wstring wNameSubstring(nameSubstring.begin(), nameSubstring.end());
     std::wstring wCharacteristicUuidStr(characteristicUuidStr.begin(), characteristicUuidStr.end());
-    auto device = new BLEDevice(wNameSubstring, wCharacteristicUuidStr);
+    auto device = new BLEDevice(wCharacteristicUuidStr);
 
     return Napi::External<BLEDevice>::New(info.Env(), device); });
 }

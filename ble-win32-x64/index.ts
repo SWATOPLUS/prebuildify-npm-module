@@ -17,11 +17,11 @@ export class BleDevice {
     this._device = null;
   }
 
-  init(nameSubstring: string, characteristicUuidStr: string): void {
+  init(characteristicUuidStr: string): void {
     if (this._device) {
       throw new Error('BleDevice already initialized');
     }
-    this._device = bleDeviceInit(nameSubstring, characteristicUuidStr);
+    this._device = bleDeviceInit(characteristicUuidStr);
     if (!this._device) {
       throw new Error('Failed to create BleDevice');
     }

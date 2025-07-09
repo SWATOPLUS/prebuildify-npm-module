@@ -29,7 +29,7 @@ var __export = (target, all) => {
 
 // prebuilds/win32-x64/@clevetura+ble-win32-x64.node
 var require__clevetura_ble_win32_x64 = __commonJS((exports2, module2) => {
-  module2.exports = require("./@clevetura+ble-win32-x64-gtan5bqy.node");
+  module2.exports = require("./@clevetura+ble-win32-x64-ec4dxrwp.node");
 });
 
 // index.ts
@@ -51,11 +51,11 @@ class BleDevice {
   constructor() {
     this._device = null;
   }
-  init(nameSubstring, characteristicUuidStr) {
+  init(characteristicUuidStr) {
     if (this._device) {
       throw new Error("BleDevice already initialized");
     }
-    this._device = bleDeviceInit(nameSubstring, characteristicUuidStr);
+    this._device = bleDeviceInit(characteristicUuidStr);
     if (!this._device) {
       throw new Error("Failed to create BleDevice");
     }
