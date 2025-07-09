@@ -6,7 +6,7 @@
     "start": "ts-node main.cts"
   },
   "dependencies": {
-    "@clevetura/ble-win32-x64": "file:../native-code/dist/"
+    "@clevetura/ble-win32-x64": "file:../ble-win32-x64/dist/"
   },
   "devDependencies": {
     "@types/node": "^24.0.10",

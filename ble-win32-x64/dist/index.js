@@ -29,15 +29,15 @@ var __export = (target, all) => {
 
 // prebuilds/win32-x64/@clevetura+ble-win32-x64.node
 var require__clevetura_ble_win32_x64 = __commonJS((exports2, module2) => {
-  module2.exports = require("./@clevetura+ble-win32-x64-e8pyre49.node");
+  module2.exports = require("./@clevetura+ble-win32-x64-gtan5bqy.node");
 });
 
 // index.ts
-var exports_native_code = {};
-__export(exports_native_code, {
+var exports_ble_win32_x64 = {};
+__export(exports_ble_win32_x64, {
   BleDevice: () => BleDevice
 });
-module.exports = __toCommonJS(exports_native_code);
+module.exports = __toCommonJS(exports_ble_win32_x64);
 var {
   bleDeviceInit,
   bleDeviceDestroy,
