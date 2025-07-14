@@ -29,7 +29,7 @@ var __export = (target, all) => {
 
 // prebuilds/darwin-arm64/@clevetura+ble-mac.node
 var require__clevetura_ble_mac = __commonJS((exports2, module2) => {
-  module2.exports = require("./@clevetura+ble-mac-bmbt790c.node");
+  module2.exports = require("./@clevetura+ble-mac-348701ey.node");
 });
 
 // index.ts
@@ -55,7 +55,7 @@ class BleDevice {
     if (this._device) {
       throw new Error("BleDevice already initialized");
     }
-    this._device = bleDeviceInit(serviceUuid, characteristicUuid);
+    this._device = bleDeviceInit(serviceUuid, characteristicUuid ?? serviceUuid);
     if (!this._device) {
       throw new Error("Failed to create BleDevice");
     }
