@@ -1,9 +1,9 @@
 import { dts } from 'bun-dts';
 
 async function main() {
+  await Bun.$`rm -rf build/`;
   await Bun.$`rm -rf dist/`;
   await Bun.$`rm -rf dist-swift/`;
-  await Bun.$`rm -rf build/`;
   await Bun.$`rm -rf prebuilds/`;
 
   const srcMac = [

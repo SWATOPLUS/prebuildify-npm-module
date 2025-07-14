@@ -17,11 +17,11 @@ export class BleDevice {
     this._device = null;
   }
 
-  init(characteristicUuidStr: string): void {
+  init(serviceUuid: string, characteristicUuid: string): void {
     if (this._device) {
       throw new Error('BleDevice already initialized');
     }
-    this._device = bleDeviceInit(characteristicUuidStr);
+    this._device = bleDeviceInit(serviceUuid, characteristicUuid);
     if (!this._device) {
       throw new Error('Failed to create BleDevice');
     }
@@ -49,10 +49,10 @@ export class BleDevice {
     return bleDeviceWrite(this._device, data);
   }
 
-  read(size: number, timeoutMs: number): Buffer | null {
+  read(timeoutMs: number): Buffer | null {
     if (!this._device) {
       throw new Error('BleDevice not initialized');
     }
-    return bleDeviceRead(this._device, size, timeoutMs);
+    return bleDeviceRead(this._device, timeoutMs);
   }
 }

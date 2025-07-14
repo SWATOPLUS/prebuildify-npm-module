@@ -1,10 +1,8 @@
 import Foundation
 import CoreBluetooth
+import Darwin
 
-typealias BLEDeviceHandle = UnsafeMutableRawPointer
-typealias ConnectCallback = @convention(c) (Int32) -> Void
-typealias WriteCallback = @convention(c) (Int32) -> Void
-typealias ReadCallback = @convention(c) (UnsafeMutableRawPointer?, Int, Int32) -> Void
+typealias BLEDeviceHandle = UnsafeMutableRawPointer?
 
 @_cdecl("bleDeviceInit")
 func bleDeviceInit(serviceUUID: UnsafePointer<CChar>, characteristicUUID: UnsafePointer<CChar>) -> BLEDeviceHandle {
@@ -16,59 +14,79 @@ func bleDeviceInit(serviceUUID: UnsafePointer<CChar>, characteristicUUID: Unsafe
 
 @_cdecl("bleDeviceDestroy")
 func bleDeviceDestroy(_ handle: BLEDeviceHandle) {
-    if handle == nil {
-        return
-    }
-    let _ = Unmanaged<BLEDevice>.fromOpaque(handle).takeRetainedValue()
+    guard let handle = handle else { return }
+    _ = Unmanaged<BLEDevice>.fromOpaque(handle).takeRetainedValue()
 }
 
 @_cdecl("bleDeviceConnect")
-func bleDeviceConnect(_ handle: BLEDeviceHandle, callback: ConnectCallback) {
+func bleDeviceConnect(_ handle: BLEDeviceHandle) -> Int32 {
+    guard let handle = handle else { return -1 }
     let device = Unmanaged<BLEDevice>.fromOpaque(handle).takeUnretainedValue()
+    let semaphore = DispatchSemaphore(value: 0)
+    var result: Int32 = -1
     Task {
         do {
             try await device.connect()
-            callback(0) // Success
+            result = 0
         } catch {
-            callback(-1) // Failure
+            result = -1
         }
+        semaphore.signal()
     }
+    _ = semaphore.wait(timeout: .distantFuture)
+    return result
 }
 
 @_cdecl("bleDeviceWrite")
-func bleDeviceWrite(_ handle: BLEDeviceHandle, data: UnsafePointer<UInt8>, length: Int, callback: WriteCallback) {
+func bleDeviceWrite(_ handle: BLEDeviceHandle, _ data: UnsafePointer<UInt8>, _ length: Int32) -> Int32 {
+    guard let handle = handle else { return -1 }
     let device = Unmanaged<BLEDevice>.fromOpaque(handle).takeUnretainedValue()
-    let swiftData = Data(bytes: data, count: length)
+    let swiftData = Data(bytes: data, count: Int(length))
     device.write(swiftData)
-    callback(0) // Assume success immediately
+    return 0 // Assume success
 }
 
 @_cdecl("bleDeviceRead")
-func bleDeviceRead(_ handle: BLEDeviceHandle, timeout: Double, callback: ReadCallback) {
+func bleDeviceRead(_ handle: BLEDeviceHandle, _ dataPtr: UnsafeMutablePointer<UnsafeMutableRawPointer?>, _ lengthPtr: UnsafeMutablePointer<Int32>, _ timeout: Double) -> Int32 {
+    guard let handle = handle else {
+        dataPtr.pointee = nil
+        lengthPtr.pointee = 0
+        return -1
+    }
     let device = Unmanaged<BLEDevice>.fromOpaque(handle).takeUnretainedValue()
+    let semaphore = DispatchSemaphore(value: 0)
+    var readData: Data? = nil
+    var result: Int32 = -1
     Task {
         if let data = await device.read(timeout: timeout) {
-            let count = data.count           
-            // Allocate raw memory
-            let rawPtr = UnsafeMutableRawPointer.allocate(byteCount: count, alignment: MemoryLayout<UInt8>.alignment)
-            
-            // Initialize memory from Data bytes
-            data.withUnsafeBytes { buffer in
-                rawPtr.copyMemory(from: buffer.baseAddress!, byteCount: count)
-            }
-            
-            callback(rawPtr, count, 0)
-            
-            // Document: caller is responsible for `deallocate()` to free memory
+            readData = data
+            result = 0
         } else {
-            callback(nil, 0, -1)
+            result = -1
         }
+        semaphore.signal()
     }
+    _ = semaphore.wait(timeout: .distantFuture)
+    if let data = readData {
+        let count = data.count
+        if let rawPtr = malloc(count) {
+            data.copyBytes(to: rawPtr.bindMemory(to: UInt8.self, capacity: count), count: count)
+            dataPtr.pointee = rawPtr
+            lengthPtr.pointee = Int32(count)
+        } else {
+            dataPtr.pointee = nil
+            lengthPtr.pointee = 0
+            result = -1
+        }
+    } else {
+        dataPtr.pointee = nil
+        lengthPtr.pointee = 0
+        result = -1
+    }
+    return result
 }
 
 @_cdecl("freeData")
 func freeData(_ ptr: UnsafeMutableRawPointer) {
-    if ptr != nil {
-        free(ptr)
-    }
+    free(ptr)
 }
