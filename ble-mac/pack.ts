@@ -28,7 +28,7 @@ async function main() {
 
   await Bun.$`
     mkdir ./dist-swift/
-    swiftc -target arm64-apple-macos11 -emit-object -output-file-map ${outputFileMapPath} ${srcMac} -framework Foundation -framework CoreBluetooth
+    swiftc -target arm64-apple-macos12 -emit-object -output-file-map ${outputFileMapPath} ${srcMac} -framework Foundation -framework CoreBluetooth
 `;
   // swiftc -target x86_64-apple-macos11 -emit-object -static ${srcMac} -framework Foundation -framework CoreBluetooth -o ./dist-swift/libblemac_x64.a
 
