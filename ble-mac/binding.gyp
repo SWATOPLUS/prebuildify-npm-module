@@ -3,11 +3,11 @@
     {
       "target_name": "ble_device",
       "sources": [
-        "src/bindings22.cc",
-        "dist-swift/libblemac_arm64.a",
+        "src/binding.mm",
+        "<!@(bun -p import.meta.dir)/dist-swift/*.o",
       ],
       "include_dirs": [
-        "<!@(node -p \"require('node-addon-api').include\")"
+        "<!@(bun -p \"require('node-addon-api').include\")"
       ],
       "cflags_cc": [ "-fexceptions" ],
       "defines": [ "NAPI_CPP_EXCEPTIONS" ],

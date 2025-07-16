@@ -1,13 +1,6 @@
 #include <napi.h>
 #include <cstdlib>
 
-// Forward declarations
-Napi::Value bleDeviceInit(const Napi::CallbackInfo& info);
-Napi::Value bleDeviceDestroy(const Napi::CallbackInfo& info);
-Napi::Value bleDeviceConnect(const Napi::CallbackInfo& info);
-Napi::Value bleDeviceWrite(const Napi::CallbackInfo& info);
-Napi::Value bleDeviceRead(const Napi::CallbackInfo& info);
-
 extern "C" {
     void* bleDeviceInit(const char* serviceUUID, const char* characteristicUUID);
     void bleDeviceDestroy(void* handle);

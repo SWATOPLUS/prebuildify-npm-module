@@ -1,4 +1,5 @@
 import { dts } from 'bun-dts';
+import { basename, join } from 'path';
 
 async function main() {
   await Bun.$`rm -rf build/`;
@@ -6,17 +7,30 @@ async function main() {
   await Bun.$`rm -rf dist-swift/`;
   await Bun.$`rm -rf prebuilds/`;
 
+  const distSwiftDir = 'dist-swift/';
+  const outputFileMapPath = join(distSwiftDir, 'output-file-map.json');
+
   const srcMac = [
     'src/bindings-wrap.swift',
     'src/BLEDevice.swift',
     'src/BLEStreamBuffer.swift',
   ];
 
+  const outputFileMap: Record<string, { object: string }> = {};
+
+  for (const source of srcMac) {
+    const objectFile = join(distSwiftDir, basename(source, ".swift") + ".o");
+    outputFileMap[source] = { object: objectFile };
+  }
+
+  Bun.file(outputFileMapPath).write(JSON.stringify(outputFileMap));
+
+
   await Bun.$`
     mkdir ./dist-swift/
-    swiftc -target x86_64-apple-macos11 -emit-library -static ${srcMac} -framework Foundation -framework CoreBluetooth -o ./dist-swift/libblemac_x64.a
-    swiftc -target arm64-apple-macos11 -emit-library -static ${srcMac} -framework Foundation -framework CoreBluetooth -o ./dist-swift/libblemac_arm64.a
+    swiftc -target arm64-apple-macos11 -emit-object -output-file-map ${outputFileMapPath} ${srcMac} -framework Foundation -framework CoreBluetooth
 `;
+  // swiftc -target x86_64-apple-macos11 -emit-object -static ${srcMac} -framework Foundation -framework CoreBluetooth -o ./dist-swift/libblemac_x64.a
 
 
   await Bun.$`node_modules/.bin/prebuildify --napi --strip --tag-prefix v`;
