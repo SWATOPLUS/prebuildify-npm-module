@@ -1,3 +1,11 @@
+interface CommonBleDevice {
+  init(serviceUuid: string, characteristicUuidStr: string): void;
+  destroy(): void;
+  connect(): Promise<boolean>;
+  write(data: Buffer): Promise<boolean>;
+  read(size: number, timeoutMs: number): Promise<Buffer | null>;
+}
+
 interface NativeBLEDevice {
   __brand: 'NativeBLEDevice';
 }
@@ -8,9 +16,9 @@ const {
   bleDeviceConnect,
   bleDeviceWrite,
   bleDeviceRead
-} = require('./prebuilds/win32-x64/@clevetura+ble-win32-x64.node');
+} = require('./prebuilds/win32-x64/@clevetura+ble-windows.node');
 
-export class BleDeviceWin {
+export class BleDeviceWin implements CommonBleDevice {
   private _device: NativeBLEDevice | null = null;
 
   constructor() {
@@ -35,23 +43,23 @@ export class BleDeviceWin {
     this._device = null;
   }
 
-  connect(): boolean {
+  connect(): Promise<boolean> {
     if (!this._device) {
-      throw new Error('BleDevice not initialized');
+      return Promise.reject(new Error('BleDevice not initialized'));
     }
     return bleDeviceConnect(this._device);
   }
 
-  write(data: Buffer): boolean {
+  write(data: Buffer): Promise<boolean> {
     if (!this._device) {
-      throw new Error('BleDevice not initialized');
+      return Promise.reject(new Error('BleDevice not initialized'));
     }
     return bleDeviceWrite(this._device, data);
   }
 
-  read(size: number, timeoutMs: number): Buffer | null {
+  read(size: number, timeoutMs: number): Promise<Buffer | null> {
     if (!this._device) {
-      throw new Error('BleDevice not initialized');
+      return Promise.reject(new Error('BleDevice not initialized'));
     }
     return bleDeviceRead(this._device, size, timeoutMs);
   }

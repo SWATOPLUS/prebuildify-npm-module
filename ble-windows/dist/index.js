@@ -27,24 +27,24 @@ var __export = (target, all) => {
     });
 };
 
-// prebuilds/win32-x64/@clevetura+ble-win32-x64.node
-var require__clevetura_ble_win32_x64 = __commonJS((exports2, module2) => {
-  module2.exports = require("./@clevetura+ble-win32-x64-ec4dxrwp.node");
+// prebuilds/win32-x64/@clevetura+ble-windows.node
+var require__clevetura_ble_windows = __commonJS((exports2, module2) => {
+  module2.exports = require("./@clevetura+ble-windows-67mshq4n.node");
 });
 
 // index.ts
-var exports_ble_win32_x64 = {};
-__export(exports_ble_win32_x64, {
+var exports_ble_windows = {};
+__export(exports_ble_windows, {
   BleDeviceWin: () => BleDeviceWin
 });
-module.exports = __toCommonJS(exports_ble_win32_x64);
+module.exports = __toCommonJS(exports_ble_windows);
 var {
   bleDeviceInit,
   bleDeviceDestroy,
   bleDeviceConnect,
   bleDeviceWrite,
   bleDeviceRead
-} = require__clevetura_ble_win32_x64();
+} = require__clevetura_ble_windows();
 
 class BleDeviceWin {
   _device = null;
@@ -69,19 +69,19 @@ class BleDeviceWin {
   }
   connect() {
     if (!this._device) {
-      throw new Error("BleDevice not initialized");
+      return Promise.reject(new Error("BleDevice not initialized"));
     }
     return bleDeviceConnect(this._device);
   }
   write(data) {
     if (!this._device) {
-      throw new Error("BleDevice not initialized");
+      return Promise.reject(new Error("BleDevice not initialized"));
     }
     return bleDeviceWrite(this._device, data);
   }
   read(size, timeoutMs) {
     if (!this._device) {
-      throw new Error("BleDevice not initialized");
+      return Promise.reject(new Error("BleDevice not initialized"));
     }
     return bleDeviceRead(this._device, size, timeoutMs);
   }

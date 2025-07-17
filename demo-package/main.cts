@@ -1,20 +1,28 @@
-async function getBleWrapper() {
-  if (process.platform === 'darwin') {
-    return (await import('@clevetura/ble-macos')).BleDeviceMac;
-  }
-
-  return (await import('@clevetura/ble-windows')).BleDeviceWin;
+interface CommonBleDevice {
+  init(serviceUuid: string, characteristicUuidStr: string): void;
+  destroy(): void;
+  connect(): Promise<boolean>;
+  write(data: Buffer): Promise<boolean>;
+  read(size: number, timeoutMs: number): Promise<Buffer | null>;
 }
 
-const BleDevice = await getBleWrapper();
+async function createBleDevice(): Promise<CommonBleDevice> {
+  if (process.platform === 'darwin') {
+    return new (await import('@clevetura/ble-macos')).BleDeviceMac() as any;
+  }
 
-function tryConnect() {
-  const ble = new BleDevice();
+  return new (await import('@clevetura/ble-windows')).BleDeviceWin();
+}
+
+async function tryConnect() {
+  const ble = await createBleDevice();
   console.log('Initing...');
   ble.init('c0e21400-e552-4eeb-9850-0148411a043d', 'c0e20001-e552-4eeb-9850-0148411a043d');
   console.log('Inited');
   console.log('Connecting...');
-  const result = ble.connect();
+  const result = await ble.connect();
+
+  console.log(result);
 
   if (result) {
     console.log('Connect succeeded');
@@ -30,7 +38,7 @@ function tryConnect() {
 }
 
 async function main() {
-  const ble = tryConnect();
+  const ble = await tryConnect();
 
   if (!ble) {
     return 1;
@@ -38,18 +46,19 @@ async function main() {
 
   const payload = Buffer.from([0x79, 0x96, 0x25, 0xA6, 0xD9, 0xFB, 0x64, 0xCD, 0xEA]);
   console.log('Writing...');
+  const writeResult = await ble.write(payload);
 
-  if (!ble.write(payload)) {
+  if (!writeResult) {
     console.log('Write failed');
   } else {
     console.log('Write succeeded');
   }
 
   console.log('Reading...');
-  const result = ble.read(1, 5000);
+  const readResult = await ble.read(1, 5000);
 
-  if (result) {
-    console.log('Received:', result);
+  if (readResult) {
+    console.log('Received:', readResult);
   } else {
     console.log('Read timeout');
   }
