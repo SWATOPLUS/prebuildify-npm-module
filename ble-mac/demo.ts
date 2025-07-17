@@ -1,16 +1,18 @@
-import { BleDevice } from './index.ts';
+import { BleDeviceMac } from './index.ts';
 
 function tryConnect(name: string) {
-  const ble = new BleDevice();
-  ble.init('c0e20001-e552-4eeb-9850-0148411a043d');
+  const ble = new BleDeviceMac();
+  ble.init('c0e21400-e552-4eeb-9850-0148411a043d', 'c0e20001-e552-4eeb-9850-0148411a043d');
   console.log('inited');
-  if (ble.connect()) {
+  const error = ble.connect();
+
+  if (!error) {
     console.log('Connected successfully to', name);
 
     return ble;
   }
 
-  console.log('Failed to connect to', name);
+  console.log('Failed to connect to', name, error);
   ble.destroy();
   console.log('BLE destroyed', name);
 

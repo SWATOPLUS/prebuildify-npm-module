@@ -7,21 +7,21 @@ const {
   bleDeviceDestroy,
   bleDeviceConnect,
   bleDeviceWrite,
-  bleDeviceRead
+  bleDeviceRead,
 } = require('./prebuilds/darwin-arm64/@clevetura+ble-mac.node');
 
-export class BleDevice {
+export class BleDeviceMac {
   private _device: NativeBLEDevice | null = null;
 
   constructor() {
     this._device = null;
   }
 
-  init(serviceUuid: string, characteristicUuid?: string): void {
+  init(serviceUuid: string, characteristicUuid: string): void {
     if (this._device) {
       throw new Error('BleDevice already initialized');
     }
-    this._device = bleDeviceInit(serviceUuid, characteristicUuid ?? serviceUuid);
+    this._device = bleDeviceInit(serviceUuid, characteristicUuid);
     if (!this._device) {
       throw new Error('Failed to create BleDevice');
     }
