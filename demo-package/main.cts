@@ -1,9 +1,9 @@
 interface CommonBleDevice {
   init(serviceUuid: string, characteristicUuidStr: string): void;
   destroy(): void;
-  connect(): Promise<boolean>;
-  write(data: Buffer): Promise<boolean>;
-  read(size: number, timeoutMs: number): Promise<Buffer | null>;
+  connect(): Promise<boolean>; // false, if error
+  write(data: Buffer): Promise<boolean>; // false, if error
+  read(size: number, timeoutMs: number): Promise<Buffer | null>; // null, if error or timeout
 }
 
 async function createBleDevice(): Promise<CommonBleDevice> {

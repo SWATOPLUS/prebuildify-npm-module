@@ -29,7 +29,7 @@ var __export = (target, all) => {
 
 // prebuilds/win32-x64/@clevetura+ble-windows.node
 var require__clevetura_ble_windows = __commonJS((exports2, module2) => {
-  module2.exports = require("./@clevetura+ble-windows-67mshq4n.node");
+  module2.exports = require("./@clevetura+ble-windows-x2vwzqsm.node");
 });
 
 // index.ts

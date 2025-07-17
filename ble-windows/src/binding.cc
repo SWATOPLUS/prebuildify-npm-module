@@ -5,7 +5,7 @@
 Napi::Value bleDeviceInit(const Napi::CallbackInfo &info)
 {
   return processArgs<Napi::String>(info, [&info](Napi::String characteristicUuidStrValue) -> Napi::Value
-                                                 {
+                                   {
     auto characteristicUuidStr = characteristicUuidStrValue.Utf8Value();
     std::wstring wCharacteristicUuidStr(characteristicUuidStr.begin(), characteristicUuidStr.end());
     auto device = new BLEDevice(wCharacteristicUuidStr);
@@ -28,9 +28,12 @@ Napi::Value bleDeviceConnect(const Napi::CallbackInfo &info)
   return processArgs<Napi::External<BLEDevice>>(info, [&info](Napi::External<BLEDevice> deviceValue) -> Napi::Value
                                                 {
     auto device = deviceValue.Data();
-    auto result = device->connect();
+    bool result = device->connect();
 
-    return Napi::Boolean::New(info.Env(), result); });
+    auto env = info.Env();
+    auto deferred = Napi::Promise::Deferred::New(env);
+    deferred.Resolve(Napi::Boolean::New(env, result));
+    return deferred.Promise(); });
 }
 
 Napi::Value bleDeviceWrite(const Napi::CallbackInfo &info)
@@ -40,7 +43,11 @@ Napi::Value bleDeviceWrite(const Napi::CallbackInfo &info)
     auto device = deviceValue.Data();
     std::vector<uint8_t> data(bufferValue.Data(), bufferValue.Data() + bufferValue.Length());
     auto result = device->write(data);
-    return Napi::Boolean::New(info.Env(), result); });
+
+    auto env = info.Env();
+    auto deferred = Napi::Promise::Deferred::New(env);
+    deferred.Resolve(Napi::Boolean::New(env, result));
+    return deferred.Promise(); });
 }
 
 Napi::Value bleDeviceRead(const Napi::CallbackInfo &info)
@@ -49,16 +56,19 @@ Napi::Value bleDeviceRead(const Napi::CallbackInfo &info)
                                                                             {
     auto device = deviceValue.Data();
     auto result = device->read(sizeValue.Int32Value(), timeoutValue.Int32Value());
+
+    auto env = info.Env();
+    auto deferred = Napi::Promise::Deferred::New(env);
     
     if (result.has_value())
     {
-      auto data = result.value();
-      auto buffer = Napi::Buffer<uint8_t>::Copy(info.Env(), data.data(), data.size());
-      
-      return buffer;
+      auto data = result.value(); 
+      deferred.Resolve(Napi::Buffer<uint8_t>::Copy(env, data.data(), data.size()));
+    } else {
+      deferred.Resolve(env.Null());
     }
     
-    return info.Env().Null(); });
+    return deferred.Promise(); });
 }
 
 Napi::Object initBinding(Napi::Env env, Napi::Object exports)
