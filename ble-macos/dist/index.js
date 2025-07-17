@@ -27,24 +27,24 @@ var __export = (target, all) => {
     });
 };
 
-// prebuilds/darwin-arm64/@clevetura+ble-mac.node
-var require__clevetura_ble_mac = __commonJS((exports2, module2) => {
-  module2.exports = require("./@clevetura+ble-mac-b6nkwv2p.node");
+// prebuilds/darwin-arm64/@clevetura+ble-macos.node
+var require__clevetura_ble_macos = __commonJS((exports2, module2) => {
+  module2.exports = require("./@clevetura+ble-macos-b5cnaekd.node");
 });
 
 // index.ts
-var exports_ble_mac = {};
-__export(exports_ble_mac, {
+var exports_ble_macos = {};
+__export(exports_ble_macos, {
   BleDeviceMac: () => BleDeviceMac
 });
-module.exports = __toCommonJS(exports_ble_mac);
+module.exports = __toCommonJS(exports_ble_macos);
 var {
   bleDeviceInit,
   bleDeviceDestroy,
   bleDeviceConnect,
   bleDeviceWrite,
   bleDeviceRead
-} = require__clevetura_ble_mac();
+} = require__clevetura_ble_macos();
 
 class BleDeviceMac {
   _device = null;

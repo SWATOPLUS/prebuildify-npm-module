@@ -8,7 +8,7 @@ const {
   bleDeviceConnect,
   bleDeviceWrite,
   bleDeviceRead,
-} = require('./prebuilds/darwin-arm64/@clevetura+ble-mac.node');
+} = require('./prebuilds/darwin-arm64/@clevetura+ble-macos.node');
 
 export class BleDeviceMac {
   private _device: NativeBLEDevice | null = null;
