@@ -10,14 +10,14 @@ const {
   bleDeviceRead
 } = require('./prebuilds/win32-x64/@clevetura+ble-win32-x64.node');
 
-export class BleDevice {
+export class BleDeviceWin {
   private _device: NativeBLEDevice | null = null;
 
   constructor() {
     this._device = null;
   }
 
-  init(characteristicUuidStr: string): void {
+  init(serviceUuid: string, characteristicUuidStr: string): void {
     if (this._device) {
       throw new Error('BleDevice already initialized');
     }

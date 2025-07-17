@@ -1,10 +1,10 @@
-declare class BleDevice {
+declare class BleDeviceWin {
 	private _device;
 	constructor();
-	init(characteristicUuidStr: string): void;
+	init(serviceUuid: string, characteristicUuidStr: string): void;
 	destroy(): void;
 	connect(): boolean;
 	write(data: Buffer): boolean;
 	read(size: number, timeoutMs: number): Buffer | null;
 }
-export { BleDevice };
+export { BleDeviceWin };

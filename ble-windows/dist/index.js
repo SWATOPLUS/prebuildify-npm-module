@@ -27,35 +27,35 @@ var __export = (target, all) => {
     });
 };
 
-// prebuilds/darwin-arm64/@clevetura+ble-mac.node
-var require__clevetura_ble_mac = __commonJS((exports2, module2) => {
-  module2.exports = require("./@clevetura+ble-mac-vtg8133b.node");
+// prebuilds/win32-x64/@clevetura+ble-win32-x64.node
+var require__clevetura_ble_win32_x64 = __commonJS((exports2, module2) => {
+  module2.exports = require("./@clevetura+ble-win32-x64-ec4dxrwp.node");
 });
 
 // index.ts
-var exports_ble_mac = {};
-__export(exports_ble_mac, {
-  BleDeviceMac: () => BleDeviceMac
+var exports_ble_win32_x64 = {};
+__export(exports_ble_win32_x64, {
+  BleDeviceWin: () => BleDeviceWin
 });
-module.exports = __toCommonJS(exports_ble_mac);
+module.exports = __toCommonJS(exports_ble_win32_x64);
 var {
   bleDeviceInit,
   bleDeviceDestroy,
   bleDeviceConnect,
   bleDeviceWrite,
   bleDeviceRead
-} = require__clevetura_ble_mac();
+} = require__clevetura_ble_win32_x64();
 
-class BleDeviceMac {
+class BleDeviceWin {
   _device = null;
   constructor() {
     this._device = null;
   }
-  init(serviceUuid, characteristicUuid) {
+  init(serviceUuid, characteristicUuidStr) {
     if (this._device) {
       throw new Error("BleDevice already initialized");
     }
-    this._device = bleDeviceInit(serviceUuid, characteristicUuid);
+    this._device = bleDeviceInit(characteristicUuidStr);
     if (!this._device) {
       throw new Error("Failed to create BleDevice");
     }
@@ -79,10 +79,10 @@ class BleDeviceMac {
     }
     return bleDeviceWrite(this._device, data);
   }
-  read(timeoutMs) {
+  read(size, timeoutMs) {
     if (!this._device) {
       throw new Error("BleDevice not initialized");
     }
-    return bleDeviceRead(this._device, timeoutMs);
+    return bleDeviceRead(this._device, size, timeoutMs);
   }
 }

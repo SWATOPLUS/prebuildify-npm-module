@@ -1,5 +1,5 @@
 {
-  "name": "@clevetura/ble-mac",
+  "name": "@clevetura/ble-macos",
   "version": "1.0.0",
   "scripts": {
     "install": "echo node-gyp skipped, use bun pack.ts to build package"

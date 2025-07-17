@@ -1,18 +1,18 @@
-function loadLib() {
+async function getBle() {
   if (process.platform === 'darwin') {
-    return import('@clevetura/ble-mac');
+    return (await import('@clevetura/ble-macos')).BleDeviceMac;
   }
 
-  return import('@clevetura/ble-win32-x64');
+  return (await import('@clevetura/ble-windows')).BleDeviceWin;
 }
 
-const BleDevice = (await loadLib()).BleDevice;
+const BleDevice = await getBle();
 
 
 
 function tryConnect(name: string) {
   const ble = new BleDevice();
-  ble.init('c0e20001-e552-4eeb-9850-0148411a043d');
+  ble.init('c0e21400-e552-4eeb-9850-0148411a043d', 'c0e20001-e552-4eeb-9850-0148411a043d');
   if (ble.connect()) {
     console.log('Connected successfully to', name);
 
