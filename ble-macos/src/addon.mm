@@ -1,5 +1,6 @@
 #include <napi.h>
 #include <cstdlib>
+#include <iostream>
 
 extern "C" {
     void* swiftBleDeviceInit(const char* serviceUUID, const char* characteristicUUID);
@@ -71,7 +72,10 @@ Napi::Value wrap_bleDeviceRead(const Napi::CallbackInfo& info) {
     void* data;
     int32_t length;
     int32_t result = swiftBleDeviceRead(external.Data(), &data, &length, timeout);
-    if (result == 0 && data != nullptr) {
+
+    std::cout << result << std::endl;
+
+    if (result > 0 && data != nullptr) {
         Napi::Buffer<uint8_t> buffer = Napi::Buffer<uint8_t>::Copy(env, static_cast<uint8_t*>(data), length);
         swiftFreeData(data);
         return buffer;
