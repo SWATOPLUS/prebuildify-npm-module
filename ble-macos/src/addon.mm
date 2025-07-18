@@ -2,12 +2,12 @@
 #include <cstdlib>
 
 extern "C" {
-    void* bleDeviceInit(const char* serviceUUID, const char* characteristicUUID);
-    void bleDeviceDestroy(void* handle);
-    int32_t bleDeviceConnect(void* handle);
-    int32_t bleDeviceWrite(void* handle, const uint8_t* data, int32_t length);
-    int32_t bleDeviceRead(void* handle, void** data, int32_t* length, double timeout);
-    void freeData(void* ptr);
+    void* swiftBleDeviceInit(const char* serviceUUID, const char* characteristicUUID);
+    void swiftBleDeviceDestroy(void* handle);
+    int32_t swiftBleDeviceConnect(void* handle);
+    int32_t swiftBleDeviceWrite(void* handle, const uint8_t* data, int32_t length);
+    int32_t swiftBleDeviceRead(void* handle, void** data, int32_t* length, double timeout);
+    void swiftFreeData(void* ptr);
 }
 
 Napi::Value wrap_bleDeviceInit(const Napi::CallbackInfo& info) {
@@ -18,7 +18,7 @@ Napi::Value wrap_bleDeviceInit(const Napi::CallbackInfo& info) {
     }
     std::string serviceUUID = info[0].As<Napi::String>().Utf8Value();
     std::string charUUID = info[1].As<Napi::String>().Utf8Value();
-    void* handle = ::bleDeviceInit(serviceUUID.c_str(), charUUID.c_str());
+    void* handle = swiftBleDeviceInit(serviceUUID.c_str(), charUUID.c_str());
     if (!handle) {
         Napi::Error::New(env, "Failed to create BLEDevice").ThrowAsJavaScriptException();
         return env.Null();
@@ -33,7 +33,7 @@ Napi::Value wrap_bleDeviceDestroy(const Napi::CallbackInfo& info) {
         return env.Undefined();
     }
     Napi::External<void> external = info[0].As<Napi::External<void>>();
-    ::bleDeviceDestroy(external.Data());
+    swiftBleDeviceDestroy(external.Data());
     return env.Undefined();
 }
 
@@ -44,7 +44,7 @@ Napi::Value wrap_bleDeviceConnect(const Napi::CallbackInfo& info) {
         return env.Null();
     }
     Napi::External<void> external = info[0].As<Napi::External<void>>();
-    int32_t result = ::bleDeviceConnect(external.Data());
+    int32_t result = swiftBleDeviceConnect(external.Data());
     return Napi::Boolean::New(env, result == 0);
 }
 
@@ -56,7 +56,7 @@ Napi::Value wrap_bleDeviceWrite(const Napi::CallbackInfo& info) {
     }
     Napi::External<void> external = info[0].As<Napi::External<void>>();
     Napi::Buffer<uint8_t> buffer = info[1].As<Napi::Buffer<uint8_t>>();
-    int32_t result = ::bleDeviceWrite(external.Data(), buffer.Data(), buffer.Length());
+    int32_t result = swiftBleDeviceWrite(external.Data(), buffer.Data(), buffer.Length());
     return Napi::Boolean::New(env, result == 0);
 }
 
@@ -70,10 +70,10 @@ Napi::Value wrap_bleDeviceRead(const Napi::CallbackInfo& info) {
     double timeout = info[1].As<Napi::Number>().DoubleValue();
     void* data;
     int32_t length;
-    int32_t result = ::bleDeviceRead(external.Data(), &data, &length, timeout);
+    int32_t result = swiftBleDeviceRead(external.Data(), &data, &length, timeout);
     if (result == 0 && data != nullptr) {
         Napi::Buffer<uint8_t> buffer = Napi::Buffer<uint8_t>::Copy(env, static_cast<uint8_t*>(data), length);
-        freeData(data);
+        swiftFreeData(data);
         return buffer;
     } else {
         return env.Null();

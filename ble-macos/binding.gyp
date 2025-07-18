@@ -3,7 +3,7 @@
     {
       "target_name": "ble_device",
       "sources": [
-        "src/binding.mm",
+        "src/addon.mm",
         "<!@(bun -p import.meta.dir)/dist-swift/*.o",
       ],
       "include_dirs": [
@@ -15,7 +15,7 @@
         "OTHER_LDFLAGS": ["-Xlinker", "-export_dynamic", "-Xlinker", "-rpath", "-Xlinker", "/usr/lib/swift"],
         "GCC_ENABLE_CPP_EXCEPTIONS": "YES",
         "CLANG_CXX_LIBRARY": "libc++",
-        "MACOSX_DEPLOYMENT_TARGET": "12"
+        "MACOSX_DEPLOYMENT_TARGET": "14"
       }
     }
   ]

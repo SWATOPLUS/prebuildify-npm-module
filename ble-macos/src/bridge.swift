@@ -4,8 +4,8 @@ import Darwin
 
 typealias BLEDeviceHandle = UnsafeMutableRawPointer?
 
-@_cdecl("bleDeviceInit")
-func bleDeviceInit(serviceUUID: UnsafePointer<CChar>, characteristicUUID: UnsafePointer<CChar>) -> BLEDeviceHandle {
+@_cdecl("swiftBleDeviceInit")
+func swiftBleDeviceInit(serviceUUID: UnsafePointer<CChar>, characteristicUUID: UnsafePointer<CChar>) -> BLEDeviceHandle {
     guard serviceUUID != nil else { return nil }
     guard characteristicUUID != nil else { return nil }
     let serviceStr = String(cString: serviceUUID)
@@ -15,14 +15,14 @@ func bleDeviceInit(serviceUUID: UnsafePointer<CChar>, characteristicUUID: Unsafe
     return handle
 }
 
-@_cdecl("bleDeviceDestroy")
-func bleDeviceDestroy(_ handle: BLEDeviceHandle) {
+@_cdecl("swiftBleDeviceDestroy")
+func swiftBleDeviceDestroy(_ handle: BLEDeviceHandle) {
     guard let handle = handle else { return }
     Unmanaged<BLEDevice>.fromOpaque(handle).release()
 }
 
-@_cdecl("bleDeviceConnect")
-func bleDeviceConnect(_ handle: BLEDeviceHandle) -> Int32 {
+@_cdecl("swiftBleDeviceConnect")
+func swiftBleDeviceConnect(_ handle: BLEDeviceHandle) -> Int32 {
     guard let handle = handle else { return -1 }
     let device = Unmanaged<BLEDevice>.fromOpaque(handle).takeUnretainedValue()
     let semaphore = DispatchSemaphore(value: 0)
@@ -50,8 +50,8 @@ func bleDeviceConnect(_ handle: BLEDeviceHandle) -> Int32 {
     }
 }
 
-@_cdecl("bleDeviceWrite")
-func bleDeviceWrite(_ handle: BLEDeviceHandle, _ data: UnsafePointer<UInt8>, _ length: Int32) -> Int32 {
+@_cdecl("swiftBleDeviceWrite")
+func swiftBleDeviceWrite(_ handle: BLEDeviceHandle, _ data: UnsafePointer<UInt8>, _ length: Int32) -> Int32 {
     guard let handle = handle else { return -1 }
     guard data != nil else { return -4 }
     let device = Unmanaged<BLEDevice>.fromOpaque(handle).takeUnretainedValue()
@@ -60,8 +60,8 @@ func bleDeviceWrite(_ handle: BLEDeviceHandle, _ data: UnsafePointer<UInt8>, _ l
     return 0
 }
 
-@_cdecl("bleDeviceRead")
-func bleDeviceRead(_ handle: BLEDeviceHandle, _ dataPtr: UnsafeMutablePointer<UnsafeMutableRawPointer?>, _ length: Int32, _ timeout: Double) -> Int32 {
+@_cdecl("swiftBleDeviceRead")
+func swiftBleDeviceRead(_ handle: BLEDeviceHandle, _ dataPtr: UnsafeMutablePointer<UnsafeMutableRawPointer?>, _ length: Int32, _ timeout: Double) -> Int32 {
     guard let handle = handle else { return -1 }
     let device = Unmanaged<BLEDevice>.fromOpaque(handle).takeUnretainedValue()
     let semaphore = DispatchSemaphore(value: 0)
@@ -104,7 +104,7 @@ func bleDeviceRead(_ handle: BLEDeviceHandle, _ dataPtr: UnsafeMutablePointer<Un
     }
 }
 
-@_cdecl("freeData")
-func freeData(_ ptr: UnsafeMutableRawPointer) {
+@_cdecl("swiftFreeData")
+func swiftFreeData(_ ptr: UnsafeMutableRawPointer) {
     free(ptr)
 }
