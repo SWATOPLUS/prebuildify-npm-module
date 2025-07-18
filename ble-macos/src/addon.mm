@@ -73,8 +73,6 @@ Napi::Value wrap_bleDeviceRead(const Napi::CallbackInfo& info) {
     int32_t length;
     int32_t result = swiftBleDeviceRead(external.Data(), &data, &length, timeout);
 
-    std::cout << result << std::endl;
-
     if (result > 0 && data != nullptr) {
         Napi::Buffer<uint8_t> buffer = Napi::Buffer<uint8_t>::Copy(env, static_cast<uint8_t*>(data), length);
         swiftFreeData(data);

@@ -22,8 +22,6 @@ async function tryConnect() {
   console.log('Connecting...');
   const result = await ble.connect();
 
-  console.log(result);
-
   if (result) {
     console.log('Connect succeeded');
     return ble;
