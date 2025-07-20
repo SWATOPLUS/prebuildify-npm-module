@@ -21,32 +21,22 @@ func swiftBleDeviceDestroy(_ handle: BLEDeviceHandle) {
     Unmanaged<BLEDevice>.fromOpaque(handle).release()
 }
 
+typealias ConnectCallback = @convention(c) (UnsafeMutableRawPointer?, Int32) -> Void
+
 @_cdecl("swiftBleDeviceConnect")
-func swiftBleDeviceConnect(_ handle: BLEDeviceHandle) -> Int32 {
-    guard let handle = handle else { return -1 }
-    let device = Unmanaged<BLEDevice>.fromOpaque(handle).takeUnretainedValue()
-    let semaphore = DispatchSemaphore(value: 0)
-    var connectionError: Error?
+func swiftBleDeviceConnect(_ handle: UnsafeMutableRawPointer?, _ context: UnsafeMutableRawPointer?, _ callback: ConnectCallback?) {
+    guard let handle = handle else { return }
+    guard let context = context else { return }
+    guard let callback = callback else { return }
     
     Task {
         do {
+            let device = Unmanaged<BLEDevice>.fromOpaque(handle).takeUnretainedValue()
             try await device.connect()
-            semaphore.signal()
+            callback(context, 0)
         } catch {
-            connectionError = error
-            semaphore.signal()
+            callback(context, -1)
         }
-    }
-    
-    let result = semaphore.wait(timeout: .now() + 10.0)
-    if result == .success {
-        if connectionError != nil {
-            return -2
-        } else {
-            return 0
-        }
-    } else {
-        return -3
     }
 }
 

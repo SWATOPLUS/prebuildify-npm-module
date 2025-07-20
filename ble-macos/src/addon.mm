@@ -1,11 +1,19 @@
+#include <cstdint>
 #include <napi.h>
 #include <cstdlib>
 #include <iostream>
 
+using ContextAndCodeCallback = void(void*, int32_t);
+
+struct CallbackContext {
+    Napi::ThreadSafeFunction tsf;
+    int32_t result;
+};
+
 extern "C" {
     void* swiftBleDeviceInit(const char* serviceUUID, const char* characteristicUUID);
     void swiftBleDeviceDestroy(void* handle);
-    int32_t swiftBleDeviceConnect(void* handle);
+    void swiftBleDeviceConnect(void* handle, void* context, ContextAndCodeCallback callback);
     int32_t swiftBleDeviceWrite(void* handle, const uint8_t* data, int32_t length);
     int32_t swiftBleDeviceRead(void* handle, void** data, int32_t* length, double timeout);
     void swiftFreeData(void* ptr);
@@ -39,14 +47,42 @@ Napi::Value wrap_bleDeviceDestroy(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value wrap_bleDeviceConnect(const Napi::CallbackInfo& info) {
-    Napi::Env env = info.Env();
-    if (info.Length() < 1 || !info[0].IsExternal()) {
-        Napi::TypeError::New(env, "Expected handle").ThrowAsJavaScriptException();
-        return env.Null();
-    }
-    Napi::External<void> external = info[0].As<Napi::External<void>>();
-    int32_t result = swiftBleDeviceConnect(external.Data());
-    return Napi::Boolean::New(env, result == 0);
+    auto handle = info[0].As<Napi::External<void>>(); 
+
+    auto deferred = Napi::Promise::Deferred::New(info.Env());
+
+    auto resolveFn = Napi::Function::New(info.Env(), [deferred](const Napi::CallbackInfo& cbInfo) {
+        int32_t result = cbInfo[0].As<Napi::Number>().Int32Value();
+        deferred.Resolve(Napi::Boolean::New(cbInfo.Env(), result == 0));
+    });
+
+    auto tsf = Napi::ThreadSafeFunction::New(
+        info.Env(),
+        resolveFn,
+        "BridgeCallback",
+        0,
+        1
+    );
+
+    auto context = new CallbackContext{ tsf, -1000000 };
+
+    auto callback = [](void * ctx, int32_t result) {
+        std::cout << result << std::endl;
+
+        auto c = (CallbackContext*)ctx;
+        c -> result = result;
+
+        c->tsf.NonBlockingCall(c, [](Napi::Env env, Napi::Function jsCallback, CallbackContext* ctx) {
+            std::cout << ctx -> result << std::endl;
+            jsCallback.Call({Napi::Number::New(env, ctx -> result)});
+            ctx->tsf.Release();
+            delete ctx;
+        });
+    };
+
+    swiftBleDeviceConnect(handle.Data(), context, callback);
+
+    return deferred.Promise();
 }
 
 Napi::Value wrap_bleDeviceWrite(const Napi::CallbackInfo& info) {
