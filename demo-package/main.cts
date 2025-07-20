@@ -35,6 +35,8 @@ async function tryConnect() {
   return null;
 }
 
+setInterval(() => console.log('async'), 0);
+
 async function main() {
   const ble = await tryConnect();
 
@@ -64,6 +66,9 @@ async function main() {
   console.log('Destroying...');
   ble.destroy();
   console.log('Destroy succeeded');
+
+  process.exit(2);
+
   return 0;
 }
 

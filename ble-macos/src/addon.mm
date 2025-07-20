@@ -67,13 +67,10 @@ Napi::Value wrap_bleDeviceConnect(const Napi::CallbackInfo& info) {
     auto context = new CallbackContext{ tsf, -1000000 };
 
     auto callback = [](void * ctx, int32_t result) {
-        std::cout << result << std::endl;
-
         auto c = (CallbackContext*)ctx;
         c -> result = result;
 
         c->tsf.NonBlockingCall(c, [](Napi::Env env, Napi::Function jsCallback, CallbackContext* ctx) {
-            std::cout << ctx -> result << std::endl;
             jsCallback.Call({Napi::Number::New(env, ctx -> result)});
             ctx->tsf.Release();
             delete ctx;
