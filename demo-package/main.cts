@@ -36,7 +36,7 @@ async function tryConnect() {
 }
 
 const initDate = Date.now();
-const asyncInterval = setInterval(() => console.log(Date.now() - initDate), 0);
+const asyncInterval = setInterval(() => console.log(Date.now() - initDate), 1);
 
 async function main() {
   const ble = await tryConnect();
