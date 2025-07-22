@@ -28,6 +28,7 @@ async function main() {
   const ble = await tryConnect();
 
   if (!ble) {
+    clearInterval(asyncInterval);
     return 1;
   }
 

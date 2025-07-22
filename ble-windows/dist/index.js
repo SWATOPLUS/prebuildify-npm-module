@@ -29,60 +29,28 @@ var __export = (target, all) => {
 
 // prebuilds/win32-x64/@clevetura+ble-windows.node
 var require__clevetura_ble_windows = __commonJS((exports2, module2) => {
-  module2.exports = require("./@clevetura+ble-windows-x2vwzqsm.node");
+  module2.exports = require("./@clevetura+ble-windows-1e54gt4j.node");
 });
 
 // index.ts
 var exports_ble_windows = {};
 __export(exports_ble_windows, {
-  BleDeviceWin: () => BleDeviceWin
+  getWindowsApi: () => getWindowsApi
 });
 module.exports = __toCommonJS(exports_ble_windows);
-var {
-  bleDeviceInit,
-  bleDeviceDestroy,
-  bleDeviceConnect,
-  bleDeviceWrite,
-  bleDeviceRead
-} = require__clevetura_ble_windows();
-
-class BleDeviceWin {
-  _device = null;
-  constructor() {
-    this._device = null;
-  }
-  init(serviceUuid, characteristicUuidStr) {
-    if (this._device) {
-      throw new Error("BleDevice already initialized");
-    }
-    this._device = bleDeviceInit(characteristicUuidStr);
-    if (!this._device) {
-      throw new Error("Failed to create BleDevice");
-    }
-  }
-  destroy() {
-    if (!this._device) {
-      throw new Error("BleDevice not initialized");
-    }
-    bleDeviceDestroy(this._device);
-    this._device = null;
-  }
-  connect() {
-    if (!this._device) {
-      return Promise.reject(new Error("BleDevice not initialized"));
-    }
-    return bleDeviceConnect(this._device);
-  }
-  write(data) {
-    if (!this._device) {
-      return Promise.reject(new Error("BleDevice not initialized"));
-    }
-    return bleDeviceWrite(this._device, data);
-  }
-  read(size, timeoutMs) {
-    if (!this._device) {
-      return Promise.reject(new Error("BleDevice not initialized"));
-    }
-    return bleDeviceRead(this._device, size, timeoutMs);
-  }
+async function getWindowsApi() {
+  const {
+    bleDeviceInit,
+    bleDeviceDestroy,
+    bleDeviceConnect,
+    bleDeviceWrite,
+    bleDeviceRead
+  } = require__clevetura_ble_windows();
+  return {
+    bleDeviceInit,
+    bleDeviceDestroy,
+    bleDeviceConnect,
+    bleDeviceWrite,
+    bleDeviceRead
+  };
 }

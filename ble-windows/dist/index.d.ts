@@ -1,17 +1,12 @@
-interface CommonBleDevice {
-	init(serviceUuid: string, characteristicUuidStr: string): void;
-	destroy(): void;
-	connect(): Promise<boolean>;
-	write(data: Buffer): Promise<boolean>;
-	read(size: number, timeoutMs: number): Promise<Buffer | null>;
+interface WindowsBleDevice {
+	__brand: "WindowsBleDevice";
 }
-declare class BleDeviceWin implements CommonBleDevice {
-	private _device;
-	constructor();
-	init(serviceUuid: string, characteristicUuidStr: string): void;
-	destroy(): void;
-	connect(): Promise<boolean>;
-	write(data: Buffer): Promise<boolean>;
-	read(size: number, timeoutMs: number): Promise<Buffer | null>;
+interface WindowsBleApi {
+	bleDeviceInit(serviceUuid: string, characteristicUuid: string): WindowsBleDevice;
+	bleDeviceDestroy(handle: WindowsBleDevice): void;
+	bleDeviceConnect(handle: WindowsBleDevice): Promise<boolean>;
+	bleDeviceWrite(handle: WindowsBleDevice, data: Buffer): Promise<boolean>;
+	bleDeviceRead(handle: WindowsBleDevice, timeout: number): Promise<Buffer | null>;
 }
-export { BleDeviceWin };
+declare function getWindowsApi(): Promise<WindowsBleApi>;
+export { getWindowsApi, WindowsBleDevice, WindowsBleApi };

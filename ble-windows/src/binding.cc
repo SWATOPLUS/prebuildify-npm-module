@@ -52,10 +52,11 @@ Napi::Value bleDeviceWrite(const Napi::CallbackInfo &info)
 
 Napi::Value bleDeviceRead(const Napi::CallbackInfo &info)
 {
-  return processArgs<Napi::External<BLEDevice>, Napi::Number, Napi::Number>(info, [&info](Napi::External<BLEDevice> deviceValue, Napi::Number sizeValue, Napi::Number timeoutValue) -> Napi::Value
+  return processArgs<Napi::External<BLEDevice>, Napi::Number>(info, [&info](Napi::External<BLEDevice> deviceValue, Napi::Number timeoutValue) -> Napi::Value
                                                                             {
     auto device = deviceValue.Data();
-    auto result = device->read(sizeValue.Int32Value(), timeoutValue.Int32Value());
+    auto size = 1; // todo: adjsust it
+    auto result = device->read(1, timeoutValue.Int32Value());
 
     auto env = info.Env();
     auto deferred = Napi::Promise::Deferred::New(env);
