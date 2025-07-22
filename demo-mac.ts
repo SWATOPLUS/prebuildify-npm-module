@@ -6,5 +6,5 @@ await Bun.$`
 await Bun.$`
   cd demo-package/
   npm i
-  bun main.cts
+  bun demo.cts
 `;

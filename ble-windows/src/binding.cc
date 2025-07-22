@@ -4,7 +4,7 @@
 
 Napi::Value bleDeviceInit(const Napi::CallbackInfo &info)
 {
-  return processArgs<Napi::String>(info, [&info](Napi::String characteristicUuidStrValue) -> Napi::Value
+  return processArgs<Napi::String, Napi::String>(info, [&info](Napi::String serviceUuidStrValue, Napi::String characteristicUuidStrValue) -> Napi::Value
                                    {
     auto characteristicUuidStr = characteristicUuidStrValue.Utf8Value();
     std::wstring wCharacteristicUuidStr(characteristicUuidStr.begin(), characteristicUuidStr.end());

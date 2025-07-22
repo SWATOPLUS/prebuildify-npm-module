@@ -56,10 +56,6 @@ extern "C" {
 
 Napi::Value wrap_bleDeviceInit(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    if (info.Length() < 2 || !info[0].IsString() || !info[1].IsString()) {
-        Napi::TypeError::New(env, "Expected serviceUUID and characteristicUUID strings").ThrowAsJavaScriptException();
-        return env.Null();
-    }
     std::string serviceUUID = info[0].As<Napi::String>().Utf8Value();
     std::string charUUID = info[1].As<Napi::String>().Utf8Value();
     void* handle = swiftBleDeviceInit(serviceUUID.c_str(), charUUID.c_str());

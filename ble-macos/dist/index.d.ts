@@ -1,10 +1,12 @@
-declare class BleDeviceMac {
-	private _device;
-	constructor();
-	init(serviceUuid: string, characteristicUuid: string): void;
-	destroy(): void;
-	connect(): boolean;
-	write(data: Buffer): boolean;
-	read(timeoutMs: number): Buffer | null;
+interface MacosBleDevice {
+	__brand: "MacosBleDevice";
 }
-export { BleDeviceMac };
+interface MacosBleApi {
+	bleDeviceInit(serviceUuid: string, characteristicUuid: string): MacosBleDevice;
+	bleDeviceDestroy(handle: MacosBleDevice): void;
+	bleDeviceConnect(handle: MacosBleDevice): Promise<boolean>;
+	bleDeviceWrite(handle: MacosBleDevice, data: Buffer): Promise<boolean>;
+	bleDeviceRead(handle: MacosBleDevice, timeout: number): Promise<Buffer | null>;
+}
+declare function getMacosApi(): Promise<MacosBleApi>;
+export { getMacosApi, MacosBleDevice, MacosBleApi };

@@ -1,18 +1,4 @@
-interface CommonBleDevice {
-  init(serviceUuid: string, characteristicUuidStr: string): void;
-  destroy(): void;
-  connect(): Promise<boolean>; // false, if error
-  write(data: Buffer): Promise<boolean>; // false, if error
-  read(size: number, timeoutMs: number): Promise<Buffer | null>; // null, if error or timeout
-}
-
-async function createBleDevice(): Promise<CommonBleDevice> {
-  if (process.platform === 'darwin') {
-    return new (await import('@clevetura/ble-macos')).BleDeviceMac() as any;
-  }
-
-  return new (await import('@clevetura/ble-windows')).BleDeviceWin();
-}
+import { createBleDevice } from "./src/common-ble-device.mts";
 
 async function tryConnect() {
   const ble = await createBleDevice();

@@ -29,60 +29,28 @@ var __export = (target, all) => {
 
 // prebuilds/darwin-arm64/@clevetura+ble-macos.node
 var require__clevetura_ble_macos = __commonJS((exports2, module2) => {
-  module2.exports = require("./@clevetura+ble-macos-ka8kc0t6.node");
+  module2.exports = require("./@clevetura+ble-macos-1pch8xdy.node");
 });
 
 // index.ts
 var exports_ble_macos = {};
 __export(exports_ble_macos, {
-  BleDeviceMac: () => BleDeviceMac
+  getMacosApi: () => getMacosApi
 });
 module.exports = __toCommonJS(exports_ble_macos);
-var {
-  bleDeviceInit,
-  bleDeviceDestroy,
-  bleDeviceConnect,
-  bleDeviceWrite,
-  bleDeviceRead
-} = require__clevetura_ble_macos();
-
-class BleDeviceMac {
-  _device = null;
-  constructor() {
-    this._device = null;
-  }
-  init(serviceUuid, characteristicUuid) {
-    if (this._device) {
-      throw new Error("BleDevice already initialized");
-    }
-    this._device = bleDeviceInit(serviceUuid, characteristicUuid);
-    if (!this._device) {
-      throw new Error("Failed to create BleDevice");
-    }
-  }
-  destroy() {
-    if (!this._device) {
-      throw new Error("BleDevice not initialized");
-    }
-    bleDeviceDestroy(this._device);
-    this._device = null;
-  }
-  connect() {
-    if (!this._device) {
-      throw new Error("BleDevice not initialized");
-    }
-    return bleDeviceConnect(this._device);
-  }
-  write(data) {
-    if (!this._device) {
-      throw new Error("BleDevice not initialized");
-    }
-    return bleDeviceWrite(this._device, data);
-  }
-  read(timeoutMs) {
-    if (!this._device) {
-      throw new Error("BleDevice not initialized");
-    }
-    return bleDeviceRead(this._device, timeoutMs);
-  }
+async function getMacosApi() {
+  const {
+    bleDeviceInit,
+    bleDeviceDestroy,
+    bleDeviceConnect,
+    bleDeviceWrite,
+    bleDeviceRead
+  } = require__clevetura_ble_macos();
+  return {
+    bleDeviceInit,
+    bleDeviceDestroy,
+    bleDeviceConnect,
+    bleDeviceWrite,
+    bleDeviceRead
+  };
 }

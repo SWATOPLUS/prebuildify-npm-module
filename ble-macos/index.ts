@@ -1,58 +1,31 @@
-interface NativeBLEDevice {
-  __brand: 'NativeBLEDevice';
+export interface MacosBleDevice {
+  __brand: 'MacosBleDevice';
 }
 
-const {
-  bleDeviceInit,
-  bleDeviceDestroy,
-  bleDeviceConnect,
-  bleDeviceWrite,
-  bleDeviceRead,
-} = require('./prebuilds/darwin-arm64/@clevetura+ble-macos.node');
+export interface MacosBleApi {
+  bleDeviceInit(serviceUuid: string, characteristicUuid: string): MacosBleDevice;
+  bleDeviceDestroy(handle: MacosBleDevice): void;
+  bleDeviceConnect(handle: MacosBleDevice): Promise<boolean>;
+  bleDeviceWrite(handle: MacosBleDevice, data: Buffer): Promise<boolean>;
+  bleDeviceRead(handle: MacosBleDevice, timeout: number): Promise<Buffer | null>;
+}
 
-export class BleDeviceMac {
-  private _device: NativeBLEDevice | null = null;
+export async function getMacosApi(): Promise<MacosBleApi> {
+  // todo: add arch dependent load
 
-  constructor() {
-    this._device = null;
-  }
+  const {
+    bleDeviceInit,
+    bleDeviceDestroy,
+    bleDeviceConnect,
+    bleDeviceWrite,
+    bleDeviceRead,
+  } = require('./prebuilds/darwin-arm64/@clevetura+ble-macos.node');
 
-  init(serviceUuid: string, characteristicUuid: string): void {
-    if (this._device) {
-      throw new Error('BleDevice already initialized');
-    }
-    this._device = bleDeviceInit(serviceUuid, characteristicUuid);
-    if (!this._device) {
-      throw new Error('Failed to create BleDevice');
-    }
-  }
-
-  destroy(): void {
-    if (!this._device) {
-      throw new Error('BleDevice not initialized');
-    }
-    bleDeviceDestroy(this._device);
-    this._device = null;
-  }
-
-  connect(): boolean {
-    if (!this._device) {
-      throw new Error('BleDevice not initialized');
-    }
-    return bleDeviceConnect(this._device);
-  }
-
-  write(data: Buffer): boolean {
-    if (!this._device) {
-      throw new Error('BleDevice not initialized');
-    }
-    return bleDeviceWrite(this._device, data);
-  }
-
-  read(timeoutMs: number): Buffer | null {
-    if (!this._device) {
-      throw new Error('BleDevice not initialized');
-    }
-    return bleDeviceRead(this._device, timeoutMs);
-  }
+  return {
+    bleDeviceInit,
+    bleDeviceDestroy,
+    bleDeviceConnect,
+    bleDeviceWrite,
+    bleDeviceRead,
+  };
 }
