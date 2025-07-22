@@ -3,7 +3,7 @@
     {
       "target_name": "ble_device_binding",
       "sources": [
-        "src/binding.cc",
+        "src/addon.cc",
         "src/BLEDevice.cpp"
       ],
       "include_dirs": [
