@@ -103,7 +103,10 @@ Napi::Value wrap_bleDeviceWrite(const Napi::CallbackInfo& info) {
     Napi::External<void> external = info[0].As<Napi::External<void>>();
     Napi::Buffer<uint8_t> buffer = info[1].As<Napi::Buffer<uint8_t>>();
     int32_t result = swiftBleDeviceWrite(external.Data(), buffer.Data(), buffer.Length());
-    return Napi::Boolean::New(env, result == 0);
+    
+    auto deferred = Napi::Promise::Deferred::New(env);
+    deferred.Resolve(Napi::Boolean::New(env, result == 0));
+    return deferred.Promise();
 }
 
 Napi::Value wrap_bleDeviceRead(const Napi::CallbackInfo& info) {
@@ -118,13 +121,15 @@ Napi::Value wrap_bleDeviceRead(const Napi::CallbackInfo& info) {
     int32_t length;
     int32_t result = swiftBleDeviceRead(external.Data(), &data, &length, timeout);
 
+    auto deferred = Napi::Promise::Deferred::New(env);
     if (result > 0 && data != nullptr) {
         Napi::Buffer<uint8_t> buffer = Napi::Buffer<uint8_t>::Copy(env, static_cast<uint8_t*>(data), length);
         swiftFreeData(data);
-        return buffer;
+        deferred.Resolve(buffer);
     } else {
-        return env.Null();
+        deferred.Resolve(env.Null());
     }
+    return deferred.Promise();
 }
 
 Napi::Object initBinding(Napi::Env env, Napi::Object exports) {
