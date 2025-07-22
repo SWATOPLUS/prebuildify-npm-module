@@ -1,0 +1,4 @@
+node_modules/
+build/
+# dist/ # will ignore dist after correct CI/CD
+prebuilds/

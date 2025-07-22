@@ -1,0 +1,13 @@
+{
+  "name": "ble-linux",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "dependencies": {
+    "dbus-next": "^0.10.0"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.18",
+    "@types/node": "^24.0.10",
+    "bun-dts": "^0.1.70"
+  }
+}
