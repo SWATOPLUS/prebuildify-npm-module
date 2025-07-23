@@ -3,7 +3,7 @@ export interface CommonBleDevice {
   destroy(): void;
   connect(): Promise<boolean>; // false, if error
   write(data: Buffer): Promise<boolean>; // false, if error
-  read(size: number, timeoutMs: number): Promise<Buffer | null>; // null, if error or timeout
+  read(timeoutMs: number): Promise<Buffer | null>; // null, if error or timeout
 }
 
 export interface NativeBleDevice {

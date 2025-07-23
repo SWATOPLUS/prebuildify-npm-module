@@ -1,5 +1,7 @@
 import { createBleDevice } from "./src/common-ble-device.mts";
 
+export const END_OF_PACKET_SYMBOL = 0x0A;
+
 async function tryConnect() {
   const ble = await createBleDevice();
   console.log('Initing...');
@@ -32,7 +34,7 @@ async function main() {
     return 1;
   }
 
-  const payload = Buffer.from([0x79, 0x96, 0x25, 0xA6, 0xD9, 0xFB, 0x64, 0xCD, 0xEA]);
+  const payload = Buffer.from([8, 2, 42, 0]);
   console.log('Writing...');
   const writeResult = await ble.write(payload);
 
@@ -43,12 +45,26 @@ async function main() {
   }
 
   console.log('Reading...');
-  const readResult = await ble.read(1, 5000);
 
-  if (readResult) {
-    console.log('Received:', readResult);
-  } else {
-    console.log('Read timeout');
+  let isReading = true;
+
+  const batches: Uint8Array[] = [];
+
+  while(isReading) {
+    const readResult = await ble.read(1000) as Uint8Array;
+
+    if (readResult) {
+      batches.push(readResult);
+      console.log('Received:', readResult);
+
+      if (readResult.includes(END_OF_PACKET_SYMBOL)) {
+        isReading = false;
+      }
+
+    } else {
+      isReading = false;
+      console.log('Read timeout');
+    }
   }
 
   console.log('Destroying...');
