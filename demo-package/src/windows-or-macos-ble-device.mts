@@ -67,12 +67,16 @@ export class WindowsOrMacosBleDevice implements ClvDeviceWrapper {
 
   private async write(request: Uint8Array): Promise<boolean> {
     try {
-      const data = Buffer.from([...request, END_OF_PACKET_SYMBOL])
-      const writeResult = await this.api.bleDeviceWrite(this.device!, data);
+      const data = [...request, END_OF_PACKET_SYMBOL];
+      const chunks = splitArray(data, 63);
 
-      if (!writeResult) {
-        console.error('[WindowsOrMacosBleDevice.write] Write failed!');
-        return false;
+      for (const chunk of chunks) {
+        const writeResult = await this.api.bleDeviceWrite(this.device!, new Uint8Array(chunk));
+        
+        if (!writeResult) {
+          console.error('[WindowsOrMacosBleDevice.write] Write failed!');
+          return false;
+        }
       }
 
       return true;      
@@ -117,4 +121,12 @@ export class WindowsOrMacosBleDevice implements ClvDeviceWrapper {
       return null;
     }
   }
+}
+
+function splitArray<T>(arr: T[], x: number) {
+  const chunks: T[][] = [];
+  for (let i = 0; i < arr.length; i += x) {
+    chunks.push(arr.slice(i, i + x));
+  }
+  return chunks;
 }
