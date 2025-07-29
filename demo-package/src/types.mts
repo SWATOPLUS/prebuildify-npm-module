@@ -1,9 +1,10 @@
-export interface CommonBleDevice {
-  init(serviceUuid: string, characteristicUuidStr: string): void;
-  destroy(): void;
-  connect(): Promise<boolean>; // false, if error
-  write(data: Buffer): Promise<boolean>; // false, if error
-  read(timeoutMs: number): Promise<Buffer | null>; // null, if error or timeout
+export interface ClvDeviceWrapper {
+  open(): Promise<boolean>;
+  close(): Promise<void>;
+  request(data: Uint8Array): Promise<Uint8Array | null>;
+
+  getKind(): string;
+  getVidPid(): null;
 }
 
 export interface NativeBleDevice {

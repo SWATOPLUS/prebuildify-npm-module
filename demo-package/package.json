@@ -6,9 +6,9 @@
     "start": "ts-node main.cts"
   },
   "dependencies": {
-    "@clevetura/ble-windows": "file:../ble-windows/dist/",
+    "@clevetura/ble-linux": "file:../ble-linux/dist/",
     "@clevetura/ble-macos": "file:../ble-macos/dist/",
-    "@clevetura/ble-linux": "file:../ble-linux/dist/"
+    "@clevetura/ble-windows": "file:../ble-windows/dist/"
   },
   "devDependencies": {
     "@types/node": "^24.0.10",

@@ -1,75 +1,28 @@
 import { createBleDevice } from "./src/common-ble-device.mts";
 
-export const END_OF_PACKET_SYMBOL = 0x0A;
-
-async function tryConnect() {
-  const ble = await createBleDevice();
-  console.log('Initing...');
-  ble.init('c0e21400-e552-4eeb-9850-0148411a043d', 'c0e20001-e552-4eeb-9850-0148411a043d');
-  console.log('Inited');
-  console.log('Connecting...');
-  const result = await ble.connect();
-
-  if (result) {
-    console.log('Connect succeeded');
-    return ble;
-  }
-
-  console.log('Connect failed');
-  console.log('Destroying...');
-  ble.destroy();
-  console.log('Destroy succeeded');
-
-  return null;
-}
-
 const initDate = Date.now();
 const asyncInterval = setInterval(() => console.log(Date.now() - initDate), 1);
 
 async function main() {
-  const ble = await tryConnect();
+  const ble = await createBleDevice('d0bf1500-c402-424a-80b0-bc7aeced077e', 'd0bf0001-c402-424a-80b0-bc7aeced077e');
+  console.log('Opening...');
+  const result = await ble.open();
 
-  if (!ble) {
+  if (!result) {
+    console.log('Open failed');
     clearInterval(asyncInterval);
     return 1;
   }
 
-  const payload = Buffer.from([8, 2, 42, 0]);
-  console.log('Writing...');
-  const writeResult = await ble.write(payload);
+  console.log('Open succeeded');
+  const payload = Uint8Array.from([8, 2, 42, 0]);
+  console.log('Requesting...');
+  const response = await ble.request(payload);
+  console.log(response);
 
-  if (!writeResult) {
-    console.log('Write failed');
-  } else {
-    console.log('Write succeeded');
-  }
-
-  console.log('Reading...');
-
-  let isReading = true;
-
-  const batches: Uint8Array[] = [];
-
-  while(isReading) {
-    const readResult = await ble.read(1000) as Uint8Array;
-
-    if (readResult) {
-      batches.push(readResult);
-      console.log('Received:', readResult);
-
-      if (readResult.includes(END_OF_PACKET_SYMBOL)) {
-        isReading = false;
-      }
-
-    } else {
-      isReading = false;
-      console.log('Read timeout');
-    }
-  }
-
-  console.log('Destroying...');
-  ble.destroy();
-  console.log('Destroy succeeded');
+  console.log('Closing...');
+  ble.close();
+  console.log('Close succeeded');
 
   clearInterval(asyncInterval);
 
