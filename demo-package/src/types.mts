@@ -15,6 +15,6 @@ export interface NativeBleApi {
   bleDeviceInit(serviceUuid: string, characteristicUuid: string): NativeBleDevice;
   bleDeviceDestroy(handle: NativeBleDevice): void;
   bleDeviceConnect(handle: NativeBleDevice): Promise<boolean>;
-  bleDeviceWrite(handle: NativeBleDevice, data: Buffer): Promise<boolean>;
-  bleDeviceRead(handle: NativeBleDevice, timeout: number): Promise<Buffer | null>;
+  bleDeviceWrite(handle: NativeBleDevice, data: Uint8Array): Promise<boolean>;
+  bleDeviceRead(handle: NativeBleDevice, timeout: number): Promise<Uint8Array | null>;
 }

@@ -1,128 +1,119 @@
-/// <reference types="node" />
 import { ClvDeviceWrapper, NativeBleDevice, NativeBleApi } from './types.mts';
 
 const END_OF_PACKET_SYMBOL = 0x0A;
+const READ_RETRY_COUNT = 300;
 
 export class WindowsOrMacosBleDevice implements ClvDeviceWrapper {
-  private serviceUuid: string;
-  private characteristicUuid: string;
   private device: NativeBleDevice | null = null;
-  private isInitialized = false;
 
-  constructor(private api: NativeBleApi, serviceUuid?: string, characteristicUuid?: string) {
-    this.serviceUuid = serviceUuid || '';
-    this.characteristicUuid = characteristicUuid || '';
-    this.device = null;
+  constructor(private api: NativeBleApi, private serviceUuid: string, private characteristicUuid: string) {
   }
 
-  getKind(): string {
+  public getKind(): string {
     return 'ble';
   }
 
-  getVidPid(): null {
+  public getVidPid(): null {
     return null;
   }
 
-  async open(): Promise<boolean> {
+  public async open(): Promise<boolean> {
     try {
-      if (!this.isInitialized) {
-        this.device = this.api.bleDeviceInit(this.serviceUuid, this.characteristicUuid);
-        this.isInitialized = true;
-
-        if (!this.device) {
-          console.error('Failed to create BleDevice');
-          return false;
-        }
-      }
-
       if (this.device) {
-        return await this.api.bleDeviceConnect(this.device);
+        return true;
       }
 
-      return false;
-    } catch (error) {
-      console.error('WindowsOrMacosBleDevice.open error', error);
-      return false;
-    }
-  }
+      this.device = this.api.bleDeviceInit(this.serviceUuid, this.characteristicUuid);
 
-  async close(): Promise<void> {
-    try {
-      if (this.device && this.isInitialized) {
-        this.api.bleDeviceDestroy(this.device);
-        this.device = null;
-        this.isInitialized = false;
-      }
-    } catch (error) {
-      console.error('WindowsOrMacosBleDevice.close error', error);
-    }
-  }
-
-  async request(data: Uint8Array): Promise<Uint8Array | null> {
-    try {
-      const writeSuccess = await this.write(data);
-      if (!writeSuccess) {
-        return null;
+      if (!this.device) {
+        console.error('[WindowsOrMacosBleDevice.open] Failed to create native device');
+        return false;
       }
 
-      return await this.read();
-    } catch (error) {
-      console.error('WindowsOrMacosBleDevice.request error', error);
-      return null;
-    }
-  }
+      const connectResult = await this.api.bleDeviceConnect(this.device);
 
-  private async write(data: Uint8Array): Promise<boolean> {
-    try {
-      const base64String = Buffer.from(data).toString('base64');
-      const byteArrayConvertedToBase64Array = Buffer.from(base64String);
-      const request = Buffer.from([...byteArrayConvertedToBase64Array, END_OF_PACKET_SYMBOL]);
-
-      console.log({request});
-
-      await this.api.bleDeviceWrite(this.device!, request);
+      if (!connectResult) {
+        console.error('[WindowsOrMacosBleDevice.open] Failed to connect to native device');
+        return false;
+      }
 
       return true;
+    } catch (error) {
+      console.error('[WindowsOrMacosBleDevice.open] Unexpected error', error);
+      return false;
+    }
+  }
+
+  public async close(): Promise<void> {
+    try {
+      if (this.device) {
+        this.api.bleDeviceDestroy(this.device);
+        this.device = null;
+      }
+    } catch (error) {
+      console.error('[WindowsOrMacosBleDevice.close] Unexpected error', error);
+    }
+  }
+
+  public async request(data: Uint8Array): Promise<Uint8Array | null> {
+    const writeResult = await this.write(data);
+
+    if (!writeResult) {
+      return null;
+    }
+
+    return await this.read();
+  }
+
+  private async write(request: Uint8Array): Promise<boolean> {
+    try {
+      const data = Buffer.from([...request, END_OF_PACKET_SYMBOL])
+      const writeResult = await this.api.bleDeviceWrite(this.device!, data);
+
+      if (!writeResult) {
+        console.error('[WindowsOrMacosBleDevice.write] Write failed!');
+        return false;
+      }
+
+      return true;      
     } catch (e) {
-      console.error('WindowsOrMacosBleDevice.write error', e);
+      console.error('[WindowsOrMacosBleDevice.write] Unexpected error', e);
       return false;
     }
   }
 
   private async read(): Promise<Uint8Array | null> {
     try {
-      let response: Buffer | null = null;
-      let fullResponse: number[] = [];
-      let hexString = '';
-      let isEndOfBufferFound = false;
-      let retryCount = 200;
+      let response: number[] = [];
+      let retryCount = READ_RETRY_COUNT;
+      while (retryCount > 0) {
+        retryCount--;
+        const data = await this.api.bleDeviceRead(this.device!, 100);
 
-      while (!isEndOfBufferFound && retryCount-- > 0) {
-        response = await this.api.bleDeviceRead(this.device!, 100);
-
-        if (!response) {
-          retryCount--;
+        if (!data?.length) {
           continue;
         }
 
+        const endIndex = data.findIndex(x => x === END_OF_PACKET_SYMBOL);
 
-        isEndOfBufferFound = response.some((d) => d === END_OF_PACKET_SYMBOL);
-
-
- 
-        fullResponse = fullResponse.concat(Array.from(response));
+        if (endIndex === -1) {
+          const chunk = Array.from(data);
+          response.push(...chunk);
+        } else {
+          const chunk = Array.from(data).slice(0, endIndex - 1);
+          response.push(...chunk);
+          retryCount = -1;
+        }
       }
 
-      if (fullResponse.length === 0) {
-        return null;
+      if (retryCount === -1) {
+        return Buffer.from(response);
       }
 
-      fullResponse = fullResponse.slice(0, fullResponse.length - 1);
-
-      hexString = Buffer.from(fullResponse).toString('ascii');
-      return new Uint8Array(Buffer.from(hexString, 'base64'));
-    } catch (error) {
-      console.error('[sendReport] read error', error);
+      console.error('[HidDeviceWrapper.read] No end of packet found. Retry count:', READ_RETRY_COUNT);
+      return null;
+    } catch (e) {
+      console.error('[HidDeviceWrapper.read] Unexpected error:', e);
       return null;
     }
   }
