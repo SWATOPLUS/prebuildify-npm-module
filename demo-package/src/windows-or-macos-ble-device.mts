@@ -110,10 +110,10 @@ export class WindowsOrMacosBleDevice implements ClvDeviceWrapper {
         return Buffer.from(response);
       }
 
-      console.error('[HidDeviceWrapper.read] No end of packet found. Retry count:', READ_RETRY_COUNT);
+      console.error('[WindowsOrMacosBleDevice.read] No end of packet found. Retry count:', READ_RETRY_COUNT);
       return null;
     } catch (e) {
-      console.error('[HidDeviceWrapper.read] Unexpected error:', e);
+      console.error('[WindowsOrMacosBleDevice.read] Unexpected error:', e);
       return null;
     }
   }

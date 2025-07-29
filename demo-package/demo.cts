@@ -16,7 +16,8 @@ async function main() {
 
   console.log('Open succeeded');
 
-  const payload = Uint8Array.from([8, 2, 42, 0]);
+  //const payload = Uint8Array.from([8, 2, 42, 0]);
+  const payload = Uint8Array.from([8, 9, 90, 0]);
   console.log('Requesting...');
   const response = await ble.request(formatRequest(payload));
   const parsedResponse = parseResponse(response ?? new Uint8Array());
