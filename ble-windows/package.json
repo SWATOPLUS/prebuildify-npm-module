@@ -9,6 +9,7 @@
     "@types/node": "^24.0.10",
     "bun-dts": "^0.1.70",
     "node-addon-api": "^4.3.0",
+    "node-gyp": "^11.3.0",
     "prebuildify": "^6.0.0"
   }
 }

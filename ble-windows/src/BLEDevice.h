@@ -5,10 +5,8 @@
 #include <mutex>
 #include <condition_variable>
 #include <queue>
-
-#include <winrt/Windows.Foundation.h>
-#include <winrt/Windows.Foundation.Collections.h>
-#include <functional>
+#include <optional>
+#include <vector>
 
 class BLEDevice {
 public:
@@ -16,16 +14,13 @@ public:
 
     bool connect();
     bool write(const std::vector<uint8_t>& data);
-    std::optional<std::vector<uint8_t>> read(size_t size, uint32_t timeoutMs);
+    std::optional<std::vector<uint8_t>> read(std::optional<uint8_t> end_byte, uint32_t timeoutMs);
 
 private:
     void notificationHandler(winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattCharacteristic const&,
-        winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattValueChangedEventArgs const&);
-
-    //std::optional<uint64_t> findDeviceAddressByVidPid();
+                             winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattValueChangedEventArgs const&);
 
     winrt::guid m_charUuid;
-
     winrt::Windows::Devices::Bluetooth::BluetoothLEDevice m_device{ nullptr };
     winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattCharacteristic m_characteristic{ nullptr };
 

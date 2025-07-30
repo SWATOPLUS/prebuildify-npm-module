@@ -5,7 +5,7 @@
 Napi::Value bleDeviceInit(const Napi::CallbackInfo &info)
 {
   return processArgs<Napi::String, Napi::String>(info, [&info](Napi::String serviceUuidStrValue, Napi::String characteristicUuidStrValue) -> Napi::Value
-                                   {
+                                                 {
     auto characteristicUuidStr = characteristicUuidStrValue.Utf8Value();
     std::wstring wCharacteristicUuidStr(characteristicUuidStr.begin(), characteristicUuidStr.end());
     auto device = new BLEDevice(wCharacteristicUuidStr);
@@ -52,24 +52,33 @@ Napi::Value bleDeviceWrite(const Napi::CallbackInfo &info)
 
 Napi::Value bleDeviceRead(const Napi::CallbackInfo &info)
 {
-  return processArgs<Napi::External<BLEDevice>, Napi::Number>(info, [&info](Napi::External<BLEDevice> deviceValue, Napi::Number timeoutValue) -> Napi::Value
-                                                                            {
-    auto device = deviceValue.Data();
-    auto size = 1; // todo: adjsust it
-    auto result = device->read(1, timeoutValue.Int32Value());
+  auto deviceValue = info[0].As<Napi::External<BLEDevice>>();
+  auto timeoutValue = info[1].As<Napi::Number>();
+  std::optional<uint8_t> end_byte;
 
-    auto env = info.Env();
-    auto deferred = Napi::Promise::Deferred::New(env);
-    
-    if (result.has_value())
-    {
-      auto data = result.value(); 
-      deferred.Resolve(Napi::Buffer<uint8_t>::Copy(env, data.data(), data.size()));
-    } else {
-      deferred.Resolve(env.Null());
-    }
-    
-    return deferred.Promise(); });
+  if (info[2].IsNumber())
+  {
+    double end_byte_double = static_cast<uint8_t>(info[2].As<Napi::Number>().DoubleValue());
+    end_byte = end_byte_double;
+  }
+
+  auto device = deviceValue.Data();
+  uint32_t timeoutMs = timeoutValue.Uint32Value();
+  auto result = device->read(end_byte, timeoutMs);
+
+  auto env = info.Env();
+  auto deferred = Napi::Promise::Deferred::New(env);
+
+  if (result.has_value())
+  {
+    deferred.Resolve(Napi::Buffer<uint8_t>::Copy(env, result->data(), result->size()));
+  }
+  else
+  {
+    deferred.Resolve(env.Null());
+  }
+
+  return deferred.Promise();
 }
 
 Napi::Object initBinding(Napi::Env env, Napi::Object exports)

@@ -16,5 +16,5 @@ export interface NativeBleApi {
   bleDeviceDestroy(handle: NativeBleDevice): void;
   bleDeviceConnect(handle: NativeBleDevice): Promise<boolean>;
   bleDeviceWrite(handle: NativeBleDevice, data: Uint8Array): Promise<boolean>;
-  bleDeviceRead(handle: NativeBleDevice, timeout: number): Promise<Uint8Array | null>;
+  bleDeviceRead(handle: NativeBleDevice, timeout: number, endByte: number): Promise<Uint8Array | null>;
 }
