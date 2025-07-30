@@ -1,7 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include <napi.h>
+#include "../node_modules/node-addon-api/napi.h"
 #include <optional>
 #include <tuple>
 #include <type_traits>

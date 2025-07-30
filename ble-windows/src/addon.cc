@@ -1,4 +1,4 @@
-#include <napi.h>
+#include "../node_modules/node-addon-api/napi.h"
 #include "BLEDevice.h"
 #include "utils.h"
 
