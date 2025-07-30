@@ -4,68 +4,62 @@
 
 Napi::Value bleDeviceInit(const Napi::CallbackInfo &info)
 {
-  return processArgs<Napi::String, Napi::String>(info, [&info](Napi::String serviceUuidStrValue, Napi::String characteristicUuidStrValue) -> Napi::Value
-                                                 {
-    auto characteristicUuidStr = characteristicUuidStrValue.Utf8Value();
-    std::wstring wCharacteristicUuidStr(characteristicUuidStr.begin(), characteristicUuidStr.end());
-    auto device = new BLEDevice(wCharacteristicUuidStr);
+  // we don't need info[0] which represents serviceUuid
+  auto characteristicUuid = info[1].As<Napi::String>().Utf8Value();
+  auto characteristicUuidWide = std::wstring(characteristicUuid.begin(), characteristicUuid.end());
+  auto device = new BLEDevice(characteristicUuidWide);
 
-    return Napi::External<BLEDevice>::New(info.Env(), device); });
+  return Napi::External<BLEDevice>::New(info.Env(), device);
 }
 
 Napi::Value bleDeviceDestroy(const Napi::CallbackInfo &info)
 {
-  return processArgs<Napi::External<BLEDevice>>(info, [&info](Napi::External<BLEDevice> deviceValue) -> Napi::Value
-                                                {
-    auto device = deviceValue.Data();
-    delete device;
+  auto device = info[0].As<Napi::External<BLEDevice>>().Data();
+  delete device;
 
-    return info.Env().Undefined(); });
+  return info.Env().Undefined();
 }
 
 Napi::Value bleDeviceConnect(const Napi::CallbackInfo &info)
 {
-  return processArgs<Napi::External<BLEDevice>>(info, [&info](Napi::External<BLEDevice> deviceValue) -> Napi::Value
-                                                {
-    auto device = deviceValue.Data();
-    bool result = device->connect();
+  auto device = info[0].As<Napi::External<BLEDevice>>().Data();
+  auto result = device->connect();
 
-    auto env = info.Env();
-    auto deferred = Napi::Promise::Deferred::New(env);
-    deferred.Resolve(Napi::Boolean::New(env, result));
-    return deferred.Promise(); });
+  auto env = info.Env();
+  auto deferred = Napi::Promise::Deferred::New(env);
+  deferred.Resolve(Napi::Boolean::New(env, result));
+
+  return deferred.Promise();
 }
 
 Napi::Value bleDeviceWrite(const Napi::CallbackInfo &info)
 {
-  return processArgs<Napi::External<BLEDevice>, Napi::Buffer<uint8_t>>(info, [&info](Napi::External<BLEDevice> deviceValue, Napi::Buffer<uint8_t> bufferValue) -> Napi::Value
-                                                                       {
-    auto device = deviceValue.Data();
-    std::vector<uint8_t> data(bufferValue.Data(), bufferValue.Data() + bufferValue.Length());
-    auto result = device->write(data);
+  auto device = info[0].As<Napi::External<BLEDevice>>().Data();
+  auto buffer = info[1].As<Napi::Uint8Array>();
+  auto data = std::vector<uint8_t>(buffer.Data(), buffer.Data() + buffer.ElementLength());
 
-    auto env = info.Env();
-    auto deferred = Napi::Promise::Deferred::New(env);
-    deferred.Resolve(Napi::Boolean::New(env, result));
-    return deferred.Promise(); });
+  auto result = device->write(data);
+
+  auto env = info.Env();
+  auto deferred = Napi::Promise::Deferred::New(env);
+  deferred.Resolve(Napi::Boolean::New(env, result));
+
+  return deferred.Promise();
 }
 
 Napi::Value bleDeviceRead(const Napi::CallbackInfo &info)
 {
-  auto deviceValue = info[0].As<Napi::External<BLEDevice>>();
-  auto timeoutValue = info[1].As<Napi::Number>();
-  std::optional<uint8_t> end_byte;
+  auto device = info[0].As<Napi::External<BLEDevice>>().Data();
+  auto timeoutMs = info[1].As<Napi::Number>().Uint32Value();
+  auto endByte = std::optional<uint8_t>();
 
+  // info[2] can be undefined
   if (info[2].IsNumber())
   {
-    double end_byte_double = static_cast<uint8_t>(info[2].As<Napi::Number>().DoubleValue());
-    end_byte = end_byte_double;
+    endByte = static_cast<uint8_t>(info[2].As<Napi::Number>().DoubleValue());
   }
 
-  auto device = deviceValue.Data();
-  uint32_t timeoutMs = timeoutValue.Uint32Value();
-  auto result = device->read(end_byte, timeoutMs);
-
+  auto result = device->read(endByte, timeoutMs);
   auto env = info.Env();
   auto deferred = Napi::Promise::Deferred::New(env);
 
