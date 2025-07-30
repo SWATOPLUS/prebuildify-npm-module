@@ -56,13 +56,21 @@ export class WindowsOrMacosBleDevice implements ClvDeviceWrapper {
   }
 
   public async request(data: Uint8Array): Promise<Uint8Array | null> {
+    const writeStart = Date.now();    
     const writeResult = await this.write(data);
+    const witeEnd = Date.now();
 
     if (!writeResult) {
       return null;
     }
+    const readStart = Date.now(); 
+    const response = await this.read();
+    const readEnd = Date.now();
 
-    return await this.read();
+    console.log('[WindowsOrMacosBleDevice.request] Write speed', (witeEnd - writeStart) / (response?.length || 1) * 1000);
+    console.log('[WindowsOrMacosBleDevice.request] Read speed', (readEnd - readStart) / (response?.length || 1) * 1000);
+
+    return response;
   }
 
   private async write(request: Uint8Array): Promise<boolean> {
