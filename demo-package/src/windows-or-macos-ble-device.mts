@@ -1,8 +1,8 @@
 import { ClvDeviceWrapper, NativeBleDevice, NativeBleApi } from './types.mts';
 
 const END_OF_PACKET_SYMBOL = 0x0A;
-const READ_RETRY_COUNT = 1000;
-const READ_TIMEOUT = 10;
+const READ_RETRY_COUNT = 100;
+const READ_TIMEOUT = 100;
 
 export class WindowsOrMacosBleDevice implements ClvDeviceWrapper {
   private device: NativeBleDevice | null = null;
