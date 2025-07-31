@@ -117,7 +117,7 @@ bool BLEDevice::write(const std::vector<uint8_t>& data) {
     }
 }
 
-std::optional<std::vector<uint8_t>> BLEDevice::read(std::optional<uint8_t> end_byte, uint32_t timeoutMs) {
+std::vector<uint8_t> BLEDevice::read(uint32_t timeoutMs, std::optional<uint8_t> end_byte) {
     std::unique_lock<std::mutex> lock(m_mutex);
     auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(timeoutMs);
 
@@ -133,7 +133,7 @@ std::optional<std::vector<uint8_t>> BLEDevice::read(std::optional<uint8_t> end_b
             m_notificationBuffer.erase(m_notificationBuffer.begin(), m_notificationBuffer.begin() + pos + 1);
             return result;
         } else {
-            return std::nullopt;
+            return std::vector<uint8_t>();
         }
     } else {
         m_cv.wait_until(lock, deadline, [this]() { return !m_notificationBuffer.empty(); });
@@ -143,7 +143,7 @@ std::optional<std::vector<uint8_t>> BLEDevice::read(std::optional<uint8_t> end_b
             m_notificationBuffer.clear();
             return result;
         } else {
-            return std::nullopt;
+            return std::vector<uint8_t>();
         }
     }
 }

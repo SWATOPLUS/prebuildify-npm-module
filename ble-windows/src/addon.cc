@@ -59,18 +59,11 @@ Napi::Value bleDeviceRead(const Napi::CallbackInfo &info)
     endByte = static_cast<uint8_t>(info[2].As<Napi::Number>().DoubleValue());
   }
 
-  auto result = device->read(endByte, timeoutMs);
+  auto result = device->read(timeoutMs, endByte);
   auto env = info.Env();
   auto deferred = Napi::Promise::Deferred::New(env);
 
-  if (result.has_value())
-  {
-    deferred.Resolve(Napi::Buffer<uint8_t>::Copy(env, result->data(), result->size()));
-  }
-  else
-  {
-    deferred.Resolve(env.Null());
-  }
+  deferred.Resolve(Napi::Buffer<uint8_t>::Copy(env, result.data(), result.size()));
 
   return deferred.Promise();
 }

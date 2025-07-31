@@ -14,7 +14,7 @@ public:
 
     bool connect();
     bool write(const std::vector<uint8_t>& data);
-    std::optional<std::vector<uint8_t>> read(std::optional<uint8_t> end_byte, uint32_t timeoutMs);
+    std::vector<uint8_t> read(uint32_t timeoutMs, std::optional<uint8_t> end_byte);
 
 private:
     void notificationHandler(winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattCharacteristic const&,

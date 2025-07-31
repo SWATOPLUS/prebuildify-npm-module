@@ -2,6 +2,7 @@ import { ClvDeviceWrapper, NativeBleDevice, NativeBleApi } from './types.mts';
 
 const END_OF_PACKET_SYMBOL = 0x0A;
 const READ_RETRY_COUNT = 1000;
+const READ_TIMEOUT = 1;
 
 export class WindowsOrMacosBleDevice implements ClvDeviceWrapper {
   private device: NativeBleDevice | null = null;
@@ -100,7 +101,7 @@ export class WindowsOrMacosBleDevice implements ClvDeviceWrapper {
       let retryCount = READ_RETRY_COUNT;
       while (retryCount > 0) {
         retryCount--;
-        const data = await this.api.bleDeviceRead(this.device!, 100, END_OF_PACKET_SYMBOL);
+        const data = await this.api.bleDeviceRead(this.device!, READ_TIMEOUT, END_OF_PACKET_SYMBOL);
 
         console.log('length', data?.length);
 
