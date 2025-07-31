@@ -19,12 +19,9 @@ using namespace Windows::Storage::Streams;
 
 BLEDevice::BLEDevice(const std::wstring& characteristicUuidStr)
     : m_charUuid(winrt::guid(characteristicUuidStr)) {
-    winrt::init_apartment();
 }
 
 bool BLEDevice::connect() {
-    winrt::init_apartment();
-
     try {
         hstring selector = BluetoothLEDevice::GetDeviceSelector();
         auto devicesOp = DeviceInformation::FindAllAsync(selector);
@@ -67,12 +64,32 @@ bool BLEDevice::connect() {
                     return true;
                 }
             }
+            catch (const winrt::hresult_error& e) {
+                std::wcerr << L"WinRT Exception while connecting to device: " << e.message().c_str() 
+                           << L" (HRESULT: 0x" << std::hex << e.code() << L")" << std::endl;
+                // Continue to try next device
+            }
+            catch (const std::exception& e) {
+                std::cerr << "Standard Exception while connecting to device: " << e.what() << std::endl;
+                // Continue to try next device
+            }
             catch (...) {
-                // Ignore and try next device
+                std::cerr << "Unknown Exception while connecting to device." << std::endl;
+                // Continue to try next device
             }
         }
     }
+    catch (const winrt::hresult_error& e) {
+        std::wcerr << L"WinRT Exception during device discovery: " << e.message().c_str() 
+                   << L" (HRESULT: 0x" << std::hex << e.code() << L")" << std::endl;
+        return false;
+    }
+    catch (const std::exception& e) {
+        std::cerr << "Standard Exception during device discovery: " << e.what() << std::endl;
+        return false;
+    }
     catch (...) {
+        std::cerr << "Unknown Exception during device discovery." << std::endl;
         return false;
     }
 
@@ -111,8 +128,16 @@ bool BLEDevice::write(const std::vector<uint8_t>& data) {
         }
         return status == GattCommunicationStatus::Success;
     }
+    catch (const winrt::hresult_error& e) {
+        std::cerr << "WinRT Exception during write operation: " << " (HRESULT: 0x" << std::hex << e.code() << ")" << std::endl;
+        return false;
+    }
+    catch (const std::exception& e) {
+        std::cerr << "Standard Exception during write operation: " << e.what() << std::endl;
+        return false;
+    }
     catch (...) {
-        std::cerr << "Exception during write operation." << std::endl;
+        std::cerr << "Unknown Exception during write operation." << std::endl;
         return false;
     }
 }
