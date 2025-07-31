@@ -2,7 +2,8 @@ import { ClvDeviceWrapper, NativeBleDevice, NativeBleApi } from './types.mts';
 
 const END_OF_PACKET_SYMBOL = 0x0A;
 const READ_RETRY_COUNT = 100;
-const READ_TIMEOUT = 100;
+const READ_TIMEOUT = 10;
+const WRITE_PACKET_SIZE = 244;
 
 export class WindowsOrMacosBleDevice implements ClvDeviceWrapper {
   private device: NativeBleDevice | null = null;
@@ -68,8 +69,8 @@ export class WindowsOrMacosBleDevice implements ClvDeviceWrapper {
     const response = await this.read();
     const readEnd = Date.now();
 
-    console.log('[WindowsOrMacosBleDevice.request] Write speed', (witeEnd - writeStart) / (response?.length || 1) * 1000);
-    console.log('[WindowsOrMacosBleDevice.request] Read speed', (readEnd - readStart) / (response?.length || 1) * 1000);
+    console.log('[WindowsOrMacosBleDevice.request] Write speed', (data?.length || 1) / (witeEnd - writeStart) * 1000);
+    console.log('[WindowsOrMacosBleDevice.request] Read speed',  (response?.length || 1)  / (readEnd - readStart) * 1000);
 
     return response;
   }
@@ -77,7 +78,7 @@ export class WindowsOrMacosBleDevice implements ClvDeviceWrapper {
   private async write(request: Uint8Array): Promise<boolean> {
     try {
       const data = [...request, END_OF_PACKET_SYMBOL];
-      const chunks = splitArray(data, 63);
+      const chunks = splitArray(data, WRITE_PACKET_SIZE);
 
       for (const chunk of chunks) {
         const writeResult = await this.api.bleDeviceWrite(this.device!, new Uint8Array(chunk));
