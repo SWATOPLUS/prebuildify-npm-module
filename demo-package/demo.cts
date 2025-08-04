@@ -17,8 +17,11 @@ async function doRequest(payload: Uint8Array) {
   console.log('Open succeeded');
 
   console.log('Requesting...');
+  const requestStart = Date.now();
   const response = await ble.request(formatRequest(payload));
   const parsedResponse = parseResponse(response ?? new Uint8Array());
+  const requestEnd = Date.now();
+  console.log('Request time', requestEnd - requestStart);
 
   console.log({ payload, parsedResponse });
 
