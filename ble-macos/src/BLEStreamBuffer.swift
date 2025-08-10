@@ -2,11 +2,11 @@ import Foundation
 
 actor BLEStreamBuffer {
     private var buffer = Data()
-    private var continuations: [CheckedContinuation<Data?, Never>] = []
+    private var continuations: [(id: UUID, continuation: CheckedContinuation<Data?, Never>)] = []
 
     func append(_ data: Data) {
         if !continuations.isEmpty {
-            let continuation = continuations.removeFirst()
+            let (_, continuation) = continuations.removeFirst()
             continuation.resume(returning: data)
         } else {
             buffer.append(data)
@@ -20,19 +20,21 @@ actor BLEStreamBuffer {
             return data
         }
 
+        let id = UUID()
         return await withCheckedContinuation { (continuation: CheckedContinuation<Data?, Never>) in
-            continuations.append(continuation)
+            continuations.append((id, continuation))
 
-            // Start a timeout task
             Task {
                 try? await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
-
-                // Remove and resume if it hasn't been fulfilled
-                if let i = continuations.firstIndex(where: { $0 as AnyObject === continuation as AnyObject }) {
-                    let c = continuations.remove(at: i)
-                    c.resume(returning: nil)
-                }
+                await self.timeoutContinuation(id: id)
             }
+        }
+    }
+
+    private func timeoutContinuation(id: UUID) {
+        if let index = continuations.firstIndex(where: { $0.id == id }) {
+            let (_, continuation) = continuations.remove(at: index)
+            continuation.resume(returning: nil)
         }
     }
 }

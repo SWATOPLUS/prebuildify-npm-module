@@ -51,7 +51,7 @@ func swiftBleDeviceWrite(_ handle: BLEDeviceHandle, _ data: UnsafePointer<UInt8>
 }
 
 @_cdecl("swiftBleDeviceRead")
-func swiftBleDeviceRead(_ handle: BLEDeviceHandle, _ dataPtr: UnsafeMutablePointer<UnsafeMutableRawPointer?>, _ length: Int32, _ timeout: Double) -> Int32 {
+func swiftBleDeviceRead(_ handle: BLEDeviceHandle, _ dataPtr: UnsafeMutablePointer<UnsafeMutableRawPointer?>, _ timeout: Double) -> Int32 {
     guard let handle = handle else { return -1 }
     let device = Unmanaged<BLEDevice>.fromOpaque(handle).takeUnretainedValue()
     let semaphore = DispatchSemaphore(value: 0)
@@ -67,13 +67,11 @@ func swiftBleDeviceRead(_ handle: BLEDeviceHandle, _ dataPtr: UnsafeMutablePoint
 
     if waitResult == .success {
         if let data = result {
-            let available = data.count
-            let toRead = min(available, Int(length))
+            let toRead = data.count
             if toRead > 0 {
-                let subdata = data.subdata(in: 0..<toRead)
                 let ptr = malloc(toRead)
                 if let p = ptr {
-                    subdata.copyBytes(to: p.assumingMemoryBound(to: UInt8.self), count: toRead)
+                    data.copyBytes(to: p.assumingMemoryBound(to: UInt8.self), count: toRead)
                     dataPtr.pointee = p
                     return Int32(toRead)
                 } else {

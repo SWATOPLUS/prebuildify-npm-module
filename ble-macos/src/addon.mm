@@ -50,7 +50,7 @@ extern "C" {
     void swiftBleDeviceDestroy(void* handle);
     void swiftBleDeviceConnect(void* handle, InteropContext* context, InteropCallback callback);
     int32_t swiftBleDeviceWrite(void* handle, const uint8_t* data, int32_t length);
-    int32_t swiftBleDeviceRead(void* handle, void** data, int32_t* length, double timeout);
+    int32_t swiftBleDeviceRead(void* handle, void** data, double timeout);
     void swiftFreeData(void* ptr);
 }
 
@@ -118,16 +118,15 @@ Napi::Value wrap_bleDeviceRead(const Napi::CallbackInfo& info) {
     Napi::External<void> external = info[0].As<Napi::External<void>>();
     double timeout = info[1].As<Napi::Number>().DoubleValue();
     void* data;
-    int32_t length;
-    int32_t result = swiftBleDeviceRead(external.Data(), &data, &length, timeout);
+    int32_t result = swiftBleDeviceRead(external.Data(), &data, timeout / 1000.0);
 
     auto deferred = Napi::Promise::Deferred::New(env);
     if (result > 0 && data != nullptr) {
-        Napi::Buffer<uint8_t> buffer = Napi::Buffer<uint8_t>::Copy(env, static_cast<uint8_t*>(data), length);
+        Napi::Buffer<uint8_t> buffer = Napi::Buffer<uint8_t>::Copy(env, static_cast<uint8_t*>(data), result);
         swiftFreeData(data);
         deferred.Resolve(buffer);
     } else {
-        deferred.Resolve(env.Null());
+        deferred.Resolve(Napi::Buffer<uint8_t>::New(env, 0));
     }
     return deferred.Promise();
 }

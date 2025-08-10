@@ -29,7 +29,7 @@ var __export = (target, all) => {
 
 // prebuilds/darwin-arm64/@clevetura+ble-macos.node
 var require__clevetura_ble_macos = __commonJS((exports2, module2) => {
-  module2.exports = require("./@clevetura+ble-macos-3akk421j.node");
+  module2.exports = require("./@clevetura+ble-macos-082w44yk.node");
 });
 
 // index.ts
