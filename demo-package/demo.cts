@@ -31,7 +31,7 @@ async function doRequest(payload: Uint8Array) {
 }
 
 async function main() {
-  const asyncInterval = setInterval(() => console.log(Date.now() - initDate), 1);
+  //const asyncInterval = setInterval(() => console.log(Date.now() - initDate), 1);
 
   const payload1 = Uint8Array.from([8, 2, 42, 0]);
   const payload2 = Uint8Array.from([8, 9, 90, 0]);
@@ -41,7 +41,7 @@ async function main() {
   await doRequest(payload2);
   await doRequest(payload3);
 
-  clearInterval(asyncInterval);
+  //clearInterval(asyncInterval);
 }
 
 main();
