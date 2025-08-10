@@ -104,7 +104,7 @@ export class WindowsOrMacosBleDevice implements ClvDeviceWrapper {
         retryCount--;
         const data = await this.api.bleDeviceRead(this.device!, READ_TIMEOUT, END_OF_PACKET_SYMBOL);
 
-        console.log('length', data?.length);
+        console.log('Data recived length:', data?.length);
 
         if (!data?.length) {
           continue;
